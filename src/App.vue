@@ -30,7 +30,9 @@ onMounted(() => {
 	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
   		console.log("getUserMedia supported.");
 		navigator.mediaDevices
-			.getUserMedia({ audio: true, })
+			.getDisplayMedia({ 
+				audio: true,
+			})
 			.then((stream) => {
 				mediaRecorder.value = new MediaRecorder(stream);
 				mediaRecorder.value.onstop = (e) => {
