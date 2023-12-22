@@ -14,6 +14,8 @@
 		"tabCapture",
 		"activeTab",
 		"tabCapture",
-		"offscreen"
-	  ]
+		"offscreen",
+		"unlimitedStorage",
+		"storage"
+	]
   }

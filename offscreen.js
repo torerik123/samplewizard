@@ -30,6 +30,7 @@ async function startRecording(streamId) {
 				chromeMediaSourceId: streamId,
 			},
 		},
+		video:false,
 	});
 
 	// Continue to play the captured audio to the user.
@@ -41,13 +42,27 @@ async function startRecording(streamId) {
 	recorder = new MediaRecorder(media, { mimeType: "video/webm" });
 	recorder.ondataavailable = (event) => data.push(event.data);
 	recorder.onstop = () => {
-		const blob = new Blob(data, { type: "video/webm" });
+		const blob = new Blob(data, { type: "audio/mp3" });
+
+		// Encode to base64 => send to app.vue
+		let reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = function () {
+        	let base64String = reader.result;
+			
+			chrome.runtime.sendMessage({
+				event: "save-recording",
+				data: base64String,
+			})
+        } 
+
 		window.open(URL.createObjectURL(blob), "_blank");
 
 		// Clear state ready for next recording
 		recorder = undefined;
 		data = [];
-	};
+	}
+
 	recorder.start();
 
 	// Record the current state in the URL. This provides a very low-bandwidth

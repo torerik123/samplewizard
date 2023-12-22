@@ -26,14 +26,10 @@ const recordingStatus = ref(false)
 const chunks = ref([])
 const audioSrc = ref(false)
 
-onMounted(() => {
-})
 const start = async () => {
 	chrome.runtime.sendMessage({
 		event: "start-recording"
 	})
-
-	return
 }
 
 const stop = () => {
