@@ -1,42 +1,49 @@
 <template>
-	<v-sheet width="400" class="bg-cyan rounded-lg pa-8">
-		<v-btn @click="start">
+	<v-sheet
+		width="400"
+		class="bg-cyan rounded-lg pa-8"
+	>
+		<v-btn @click="setRecordingStatus('start-recording')">
 			Start
 		</v-btn>
-		<v-btn @click="stop">
+		<v-btn @click="setRecordingStatus('stop-recording')">
 			Stop
 		</v-btn>
 
-		<p>Recording: {{  recordingStatus }}</p>
+		<p>Recording: {{ recordingStatus }}</p>
 		<h1>output</h1>
 		<audio 
-			id='recording' 
-			controls='true'
+			id="recording" 
+			controls="true"
 			:src="audioSrc"
-		></audio>
+		/>
 	</v-sheet>
 </template>
 
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
-const mediaRecorder = ref(null)
 const recordingStatus = ref(false)
-const chunks = ref([])
 const audioSrc = ref(false)
 
-const start = async () => {
+const setRecordingStatus = async (status) => {
 	chrome.runtime.sendMessage({
-		event: "start-recording"
+		event: status
 	})
 }
 
-const stop = () => {
-	chrome.runtime.sendMessage({
-		event: "stop-recording"
-	})
-}
+// TODO => Watch localstorage for changes??? 
+onMounted( async () => {
+	const result = await chrome.storage.local.get(["recordedFile"])
+	audioSrc.value = result.recordedFile
+})
+
+console.log(chrome.storage.local.get(["recordedFile"]))
+// const savedRecording = computed(() => {
+// 	const result = 
+// 	return null
+// })
 </script>
 
 <style>

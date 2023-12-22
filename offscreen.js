@@ -49,14 +49,14 @@ async function startRecording(streamId) {
         reader.readAsDataURL(blob);
         reader.onloadend = function () {
         	let base64String = reader.result;
-			
+
 			chrome.runtime.sendMessage({
 				event: "save-recording",
 				data: base64String,
 			})
         } 
 
-		window.open(URL.createObjectURL(blob), "_blank");
+		// window.open(URL.createObjectURL(blob), "_blank");
 
 		// Clear state ready for next recording
 		recorder = undefined;
