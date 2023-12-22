@@ -7,11 +7,18 @@ import manifest from "./manifest.json"; // Node 14 & 16
 export default defineConfig({
 	plugins: [vue(), crx({ manifest }), ,],
 
+	build: {
+		rollupOptions: {
+			input: {
+				offscreen: "offscreen.html",
+			},
+		},
+	},
 	server: {
 		port: 5173,
 		strictPort: true,
 		hmr: {
-		  port: 5173,
+			port: 5173,
 		},
 	},
 });

@@ -26,56 +26,20 @@ const recordingStatus = ref(false)
 const chunks = ref([])
 const audioSrc = ref(false)
 
-// onMounted(() => {
-// 	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-//   		console.log("getUserMedia supported.");
-// 		navigator.mediaDevices
-// 			.getDisplayMedia({ 
-// 				audio: true,
-// 			})
-// 			.then((stream) => {
-// 				mediaRecorder.value = new MediaRecorder(stream);
+onMounted(() => {
+})
+const start = async () => {
+	chrome.runtime.sendMessage({
+		event: "start-recording"
+	})
 
-// 				// Keep playing audio to the user
-// 				const output = new AudioContext();
-// 				const source = output.createMediaStreamSource(stream);
-// 				source.connect(output.destination);
-
-// 				mediaRecorder.value.onstop = (e) => {
-// 					console.log("recorder stopped");
-
-// 					// TODO => Set audio format 
-// 					const blob = new Blob(chunks.value, { type: "audio/ogg; codecs=opus" });
-// 					console.log(blob)
-// 					chunks.value = [];
-// 					audioSrc.value = window.URL.createObjectURL(blob);
-// 				};
-// 			})
-// 			// Error callback
-// 			.catch((err) => {
-// 				console.error(`The following getUserMedia error occurred: ${err}`);
-// 			});
-// 	} else {
-// 		console.log("getUserMedia not supported on your browser!");
-// 	}
-// })
-
-const start = () => {
-	recordingStatus.value = true
-	mediaRecorder.value.start()
-	console.log(mediaRecorder.value.state);
-	console.log("recorder started");
-
-	mediaRecorder.value.ondataavailable = (e) => {
-		chunks.value.push(e.data);
-	}
+	return
 }
 
 const stop = () => {
-	recordingStatus.value = false
-	mediaRecorder.value.stop()
-  	console.log(mediaRecorder.value.state)
-  	console.log("recorder stopped")
+	chrome.runtime.sendMessage({
+		event: "stop-recording"
+	})
 }
 </script>
 
