@@ -51,7 +51,7 @@ async function startRecording(streamId) {
         	let base64String = reader.result;
 
 			chrome.runtime.sendMessage({
-				event: "save-recording",
+				type: "save-recording",
 				data: base64String,
 			})
         } 

@@ -1,12 +1,16 @@
 const getCurrentTab = async () => {
-    let queryOptions = { active: true, lastFocusedWindow: true };
+    let queryOptions = { 
+		active: true, 
+		// lastFocusedWindow: true
+	 };
     // `tab` will either be a `tabs.Tab` instance or `undefined`.
     let [tab] = await chrome.tabs.query(queryOptions);
+	console.log(tab)
     return tab;
   }
 
-chrome.runtime.onMessage.addListener(async(message) => { 
-	switch (message.event) {
+chrome.runtime.onMessage.addListener(async(message) => {
+	switch (message.type) {
 		case "start-recording":
 			let recording = false;
 			const { id } = await getCurrentTab()
@@ -53,10 +57,15 @@ chrome.runtime.onMessage.addListener(async(message) => {
 
 			try {
 				await chrome.storage.local.set({
-					recordedFile: message.data
-				});
-				const result = await chrome.storage.local.get(["recordedFile"]);
-				console.log(result);
+					["recording_" + timestamp]: message.data
+				})
+
+				const result = await chrome.storage.local.get(["recording_" + timestamp])
+
+				chrome.runtime.sendMessage({
+					type: "recording-saved",
+					data: { id: timestamp },
+				})
 			  } catch(error) {
 				console.log(error);
 			  }

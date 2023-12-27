@@ -16,6 +16,7 @@
 		"tabCapture",
 		"offscreen",
 		"unlimitedStorage",
-		"storage"
+		"storage",
+		"downloads"
 	]
   }

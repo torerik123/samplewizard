@@ -12,11 +12,18 @@
 
 		<p>Recording: {{ recordingStatus }}</p>
 		<h1>output</h1>
+		{{ audioSrc }}
 		<audio 
 			id="recording" 
 			controls="true"
 			:src="audioSrc"
 		/>
+		<v-btn v-if="audioSrc" @click="downloadFile">Download</v-btn>
+		<!-- <a 
+			download="audio-file" 
+			id="audioRecordDownload" 
+			:href="audioSrc"
+		>Download audio</a> -->
 	</v-sheet>
 </template>
 
@@ -29,21 +36,27 @@ const audioSrc = ref(false)
 
 const setRecordingStatus = async (status) => {
 	chrome.runtime.sendMessage({
-		event: status
+		type: status
 	})
 }
 
-// TODO => Watch localstorage for changes??? 
+const downloadFile = () => {
+	chrome.downloads.download({	url: audioSrc.value })
+}	
+
 onMounted( async () => {
-	const result = await chrome.storage.local.get(["recordedFile"])
-	audioSrc.value = result.recordedFile
+	chrome.runtime.onMessage.addListener(async(message) => { 
+		if (message.type === "recording-saved") {
+			const id = message.data.id
+			const result = await chrome.storage.local.get(["recording_" + id])
+			audioSrc.value = result["recording_" + id]	
+		}
+
+	})
 })
 
-console.log(chrome.storage.local.get(["recordedFile"]))
-// const savedRecording = computed(() => {
-// 	const result = 
-// 	return null
-// })
+
+
 </script>
 
 <style>
