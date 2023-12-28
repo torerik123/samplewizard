@@ -1,3 +1,12 @@
+import ExtPay from "./ExtPay.js";
+
+const extpay = ExtPay('samplewizard')
+extpay.startBackground(); // this line is required to use ExtPay in the rest of your extension
+
+extpay.getUser().then(user => {
+	console.log(user)
+})
+
 const getCurrentTab = async () => {
     let queryOptions = { 
 		active: true, 

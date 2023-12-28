@@ -19,17 +19,13 @@
 			:src="audioSrc"
 		/>
 		<v-btn v-if="audioSrc" @click="downloadFile">Download</v-btn>
-		<!-- <a 
-			download="audio-file" 
-			id="audioRecordDownload" 
-			:href="audioSrc"
-		>Download audio</a> -->
 	</v-sheet>
 </template>
 
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import ExtPay from "../ExtPay.js";
 
 const recordingStatus = ref(false)
 const audioSrc = ref(false)
@@ -41,10 +37,15 @@ const setRecordingStatus = async (status) => {
 }
 
 const downloadFile = () => {
+	// TODO => Not playing properly in VLC 
 	chrome.downloads.download({	url: audioSrc.value })
 }	
 
 onMounted( async () => {
+	// TODO => Look for saved recordings 
+	const extpay = ExtPay('samplewizard')
+	extpay.openPaymentPage()
+
 	chrome.runtime.onMessage.addListener(async(message) => { 
 		if (message.type === "recording-saved") {
 			const id = message.data.id

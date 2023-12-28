@@ -7,6 +7,7 @@
 	},
 	"background": {
 		"service_worker": "background.js",
+		"scripts": [ "Extpay.js" ],
 		"type": "module"
 	},
 	"permissions": [
@@ -18,5 +19,8 @@
 		"unlimitedStorage",
 		"storage",
 		"downloads"
+	],
+	"host_permissions": [
+		"https://extensionpay.com/*"
 	]
   }
