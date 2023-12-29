@@ -22,5 +22,14 @@
 	],
 	"host_permissions": [
 		"https://extensionpay.com/*"
-	]
+	],
+	"commands": { 
+		"showcontentdialog": { 
+			"suggested_key": { 
+				"default": "Ctrl+Shift+Y" 
+			}, 
+		"description": "show content dialog" 
+		} 
+	}
   }
+  

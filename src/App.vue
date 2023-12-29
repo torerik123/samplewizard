@@ -1,51 +1,74 @@
 <template>
-	<v-sheet
-		v-if="user"
-		width="400"
-		class="bg-cyan rounded-lg pa-8"
-	>
-		<v-row dense class="mb-5">
-			<v-spacer></v-spacer>
-			<v-col>
-				<v-btn 
-					@click="setRecordingStatus('start-recording')"
-					class="elevation-0"
-				>
-					Start
-				</v-btn>
-			</v-col>
-			<v-col>
-				<v-btn 
-					@click="setRecordingStatus('stop-recording')"
-					class="elevation-0"
-				>
-					Stop
-				</v-btn>
-			</v-col>
-			<v-spacer></v-spacer>
-		</v-row>
-
-		<audio 
-			id="recording" 
-			controls="true"
-			:src="audioSrc"
-		/>
-		<v-btn v-if="audioSrc" @click="downloadFile">Download</v-btn>
-	</v-sheet>
-	
-	<v-sheet 
-		v-else
-		width="400"
-		class="bg-cyan rounded-lg pa-8"
-	>
-		<v-card-text class="text-body-1">You are not logged in.</v-card-text>
-		<v-btn 
-			@click="login"
-			class="elevation-0"
+	<v-app>
+		<v-sheet
+			v-if="user"
+			width="400"
+			class="bg-cyan pa-8"
 		>
-			Log in
-		</v-btn>
-	</v-sheet>
+			<v-row dense class="mb-5">
+				<v-spacer></v-spacer>
+				<v-col>
+					<v-btn 
+						v-if="!isRecording"
+						prepend-icon="mdi-radiobox-marked"
+						@click="setRecordingStatus('start-recording')"
+						class="elevation-0"
+						size="large"
+					>
+						<template #prepend>
+							<v-icon 
+								icon="mdi-radiobox-marked"
+								color="red"
+							/>
+						</template>
+						Record
+					</v-btn>
+					<v-btn
+						v-if="isRecording"
+						@click="setRecordingStatus('stop-recording')"
+						prepend-icon="mdi-stop"
+						class="elevation-0"
+						size="large"
+					>
+						Stop recording
+					</v-btn>
+				</v-col>
+				<v-spacer></v-spacer>
+			</v-row>
+	
+			<audio 
+				id="recording" 
+				controls="true"
+				:src="audioSrc"
+				class="mb-5"
+			/>
+
+			<!-- Download  -->
+			<v-btn 
+				v-if="audioSrc" 
+				@click="downloadFile"
+				text="Download"
+				class="elevation-0"
+				prepend-icon="mdi-download-outline"
+				size="large"
+				color=""
+			/>
+		</v-sheet>
+		
+		<v-sheet 
+			v-else
+			width="400"
+			class="bg-cyan pa-8"
+		>
+			<v-card-text class="text-body-1">You are not logged in.</v-card-text>
+			<v-btn 
+				@click="login"
+				class="elevation-0"
+			>
+				Log in
+			</v-btn>
+		</v-sheet>
+	</v-app>
 </template>
 
 
@@ -53,10 +76,10 @@
 import { ref, onMounted } from 'vue';
 import ExtPay from "../ExtPay.js";
 
+const extpay = ExtPay('samplewizard')
 const audioSrc = ref(false)
 const user = ref(false)
-
-const extpay = ExtPay('samplewizard')
+const isRecording = ref(false)
 
 const login = () => {
 	extpay.openPaymentPage()
@@ -81,6 +104,8 @@ onMounted( async () => {
 })
 
 const setRecordingStatus = async (status) => {
+	isRecording.value = status === "start-recording" ? true : false 
+
 	chrome.runtime.sendMessage({
 		type: status
 	})
