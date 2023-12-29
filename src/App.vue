@@ -1,73 +1,121 @@
 <template>
 	<v-app>
-		<v-sheet
-			v-if="user"
-			width="400"
-			class="bg-cyan pa-8"
+		<div
+			style="height: 100%;"
+			class="bg-cyan-lighten-2 d-flex align-center"
 		>
-			<v-row dense class="mb-5">
-				<v-spacer></v-spacer>
-				<v-col>
-					<v-btn 
-						v-if="!isRecording"
-						prepend-icon="mdi-radiobox-marked"
-						@click="setRecordingStatus('start-recording')"
-						class="elevation-0"
-						size="large"
-					>
-						<template #prepend>
-							<v-icon 
-								icon="mdi-radiobox-marked"
-								color="red"
-							/>
-						</template>
-						Record
-					</v-btn>
-					<v-btn
-						v-if="isRecording"
-						@click="setRecordingStatus('stop-recording')"
-						prepend-icon="mdi-stop"
-						class="elevation-0"
-						size="large"
-					>
-						Stop recording
-					</v-btn>
-				</v-col>
-				<v-spacer></v-spacer>
-			</v-row>
-	
-			<audio 
-				id="recording" 
-				controls="true"
-				:src="audioSrc"
-				class="mb-5"
-			/>
-
-			<!-- Download  -->
-			<v-btn 
-				v-if="audioSrc" 
-				@click="downloadFile"
-				text="Download"
-				class="elevation-0"
-				prepend-icon="mdi-download-outline"
-				size="large"
-				color=""
-			/>
-		</v-sheet>
-		
-		<v-sheet 
-			v-else
-			width="400"
-			class="bg-cyan pa-8"
-		>
-			<v-card-text class="text-body-1">You are not logged in.</v-card-text>
-			<v-btn 
-				@click="login"
-				class="elevation-0"
+			<v-sheet
+				v-if="user"
+				width="400"
+				class="pa-5 align-items-center"
+				color="transparent"
 			>
-				Log in
-			</v-btn>
-		</v-sheet>
+				<v-row 
+					dense 
+					no-gutters
+					class="pb-3"
+				>
+					<v-col>
+						<v-card-title>SampleWizard</v-card-title>
+					</v-col>
+				</v-row>
+				<v-row 
+					dense 
+					no-gutters
+				>	
+					<v-spacer></v-spacer>
+					<v-col cols="auto">
+						<v-btn
+							v-if="!isRecording && !audioSrc"
+							prepend-icon="mdi-radiobox-marked"
+							@click="setRecordingStatus('start-recording')"
+							class="elevation-0"
+							size="x-large"
+						>
+							<template #prepend>
+								<v-icon 
+									icon="mdi-radiobox-marked"
+									color="red"
+								/>
+							</template>
+							Record
+						</v-btn>
+						<v-btn
+							v-if="isRecording && !audioSrc"
+							@click="setRecordingStatus('stop-recording')"
+							prepend-icon="mdi-stop"
+							class="elevation-0"
+							size="x-large"
+						>
+							Stop recording
+						</v-btn>
+					</v-col>
+					<v-spacer></v-spacer>
+				</v-row>
+		
+
+				<!-- Playback  -->
+				<v-row 
+					v-if="audioSrc"
+					dense
+					no-gutters
+					class="flex-nowrap"
+				>
+					<v-col>
+						<audio 
+							id="recording" 
+							controls="true"
+							:src="audioSrc"
+							class="mb-5"
+						/>
+					</v-col>
+
+					<!-- Delete  -->
+					<v-col cols="auto" class="pl-3">
+						<v-btn
+							@click="audioSrc = null"
+							icon="mdi-trash-can"
+							class="elevation-0"
+						/>
+					</v-col>
+				</v-row>
+
+				<!-- Download  -->
+				<v-row 
+					v-if="audioSrc"
+					dense
+				>
+					<v-col>
+						<v-btn 
+							@click="downloadFile"
+							text="Download"
+							class="elevation-0"
+							prepend-icon="mdi-download-outline"
+							size="x-large"
+							color="success"
+						/>
+					</v-col>
+				</v-row>			
+			</v-sheet>
+			
+			<!-- Log in  -->
+			<v-sheet 
+				v-else
+				color="transparent"
+				width="400"
+				class="pa-8"
+			>
+				<v-card-text class="text-body-1">You are not logged in.</v-card-text>
+
+				<v-btn 
+					@click="login"
+					class="elevation-0"
+					size="x-large"
+				>
+					Log in
+				</v-btn>
+			</v-sheet>
+		</div>
 	</v-app>
 </template>
 
@@ -112,7 +160,8 @@ const setRecordingStatus = async (status) => {
 }
 
 const downloadFile = () => {
-	// TODO => Not playing properly in VLC 
+	// TODO => Not playing properly in VLC
+	// set bitrate, author url? 
 	chrome.downloads.download({	url: audioSrc.value })
 }	
 
