@@ -66,6 +66,7 @@
 							id="recording" 
 							controls="true"
 							:src="audioSrc"
+							type="audio/wav"
 							class="mb-5"
 						/>
 					</v-col>
@@ -160,9 +161,12 @@ const setRecordingStatus = async (status) => {
 }
 
 const downloadFile = () => {
-	// TODO => Not playing properly in VLC
+	// TODO => Convert webm to mp3/wav
+
+	// TODO => Not playing properly in VLC => missing audio codec?
 	// set bitrate, author url? 
 	chrome.downloads.download({	url: audioSrc.value })
+	console.log("downloaded file", audioSrc.value)
 }	
 
 </script>

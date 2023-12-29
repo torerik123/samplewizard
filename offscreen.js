@@ -30,19 +30,22 @@ async function startRecording(streamId) {
 				chromeMediaSourceId: streamId,
 			},
 		},
-		video:false,
+		video: false,
 	});
 
 	// Continue to play the captured audio to the user.
-	const output = new AudioContext();
-	const source = output.createMediaStreamSource(media);
-	source.connect(output.destination);
+	const output = new AudioContext()
+	const source = output.createMediaStreamSource(media)
+	source.connect(output.destination)
 
-	// Start recording.
-	recorder = new MediaRecorder(media, { mimeType: "video/webm" });
+	// Start recording
+	recorder = new MediaRecorder(media, { 
+		mimeType: "video/webm; codecs=opus"
+	})
+
 	recorder.ondataavailable = (event) => data.push(event.data);
 	recorder.onstop = () => {
-		const blob = new Blob(data, { type: "audio/mp3" });
+		const blob = new Blob(data, { type: "video/webm; codecs=opus" });
 
 		// Encode to base64 => send to app.vue
 		let reader = new FileReader();
@@ -56,7 +59,7 @@ async function startRecording(streamId) {
 			})
         } 
 
-		// window.open(URL.createObjectURL(blob), "_blank");
+		// window.open();
 
 		// Clear state ready for next recording
 		recorder = undefined;
