@@ -85,10 +85,4 @@ async function stopRecording() {
 
 	// Update current state in URL
 	window.location.hash = "";
-
-	// Note: In a real extension, you would want to write the recording to a more
-	// permanent location (e.g IndexedDB) and then close the offscreen document,
-	// to avoid keeping a document around unnecessarily. Here we avoid that to
-	// make sure the browser keeps the Object URL we create (see above) and to
-	// keep the sample fairly simple to follow.
 }

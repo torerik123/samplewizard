@@ -140,16 +140,21 @@ onMounted( async () => {
 	if (authUser?.paid) {
 		user.value = authUser
 	}
-	
-	// TODO => Look for saved recordings 
+	 
 	chrome.runtime.onMessage.addListener(async(message) => { 
 		if (message.type === "recording-saved") {
 			const id = message.data.id
 			const result = await chrome.storage.local.get(["recording_" + id])
 			audioSrc.value = result["recording_" + id]	
 		}
-
 	})
+
+	const existingContexts = await chrome.runtime.getContexts({});
+	const offscreenDocument = existingContexts.find(
+		(c) => c.contextType === 'OFFSCREEN_DOCUMENT'
+	)
+
+	isRecording.value = offscreenDocument.documentUrl.endsWith('#recording')
 })
 
 const setRecordingStatus = async (status) => {

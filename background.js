@@ -20,8 +20,8 @@ const getCurrentTab = async () => {
 
 // Open with keyboard shortcut
 chrome.commands.onCommand.addListener(function(command) {
-if( command.name == "showcontentdialog") {
-	  chrome.tabs.executeScript({ file: "main.js" })
+	if( command.name == "showcontentdialog") {
+		chrome.tabs.executeScript({ file: "main.js" })
 	}
 })
 
@@ -33,7 +33,7 @@ chrome.runtime.onMessage.addListener(async(message) => {
 			const existingContexts = await chrome.runtime.getContexts({});
 			const offscreenDocument = existingContexts.find(
 				(c) => c.contextType === 'OFFSCREEN_DOCUMENT'
-			  );
+			);
 
 
 			// If an offscreen document is not already open, create one.
@@ -45,7 +45,7 @@ chrome.runtime.onMessage.addListener(async(message) => {
 				justification: 'Recording from chrome.tabCapture API'
 				});
 			} else {
-				recording = offscreenDocument.documentUrl.endsWith('#recording');
+				recording = offscreenDocument.documentUrl.endsWith('#recording')
 			}
 
 			// Get a MediaStream for the active tab.
@@ -66,6 +66,7 @@ chrome.runtime.onMessage.addListener(async(message) => {
 				type: 'stop-recording',
 				target: 'offscreen'
 			});
+
 		break
 
 		case "save-recording":
@@ -82,9 +83,11 @@ chrome.runtime.onMessage.addListener(async(message) => {
 					type: "recording-saved",
 					data: { id: timestamp },
 				})
-			  } catch(error) {
+
+				chrome.offscreen.closeDocument()
+			} catch(error) {
 				console.log(error);
-			  }
+			}
 		break
 		default: break
 	}
