@@ -1,0 +1,58 @@
+{
+  "../../../../@crx/manifest": {
+    "file": "assets/crx-manifest.js-psLHLRBP.js",
+    "isEntry": true,
+    "src": "../../../../@crx/manifest"
+  },
+  "ExtPay.js": {
+    "file": "assets/Extpay.js-J2Sy7LH6.js",
+    "isEntry": true,
+    "src": "ExtPay.js"
+  },
+  "background.js": {
+    "file": "assets/background.js-UoFyB7xf.js",
+    "imports": [
+      "ExtPay.js"
+    ],
+    "isEntry": true,
+    "src": "background.js"
+  },
+  "index.html": {
+    "assets": [
+      "assets/materialdesignicons-webfont-kq_ClZaA.eot",
+      "assets/materialdesignicons-webfont-6eb_lmTU.woff2",
+      "assets/materialdesignicons-webfont-D15t_tsC.woff",
+      "assets/materialdesignicons-webfont-e5j8FT_3.ttf"
+    ],
+    "css": [
+      "assets/index-k0AVCwQs.css"
+    ],
+    "file": "assets/index.html-LJKD0wid.js",
+    "imports": [
+      "ExtPay.js"
+    ],
+    "isEntry": true,
+    "src": "index.html"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot": {
+    "file": "assets/materialdesignicons-webfont-kq_ClZaA.eot",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf": {
+    "file": "assets/materialdesignicons-webfont-e5j8FT_3.ttf",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff": {
+    "file": "assets/materialdesignicons-webfont-D15t_tsC.woff",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2": {
+    "file": "assets/materialdesignicons-webfont-6eb_lmTU.woff2",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2"
+  },
+  "offscreen.html": {
+    "file": "assets/offscreen-k52RqIHf.js",
+    "isEntry": true,
+    "src": "offscreen.html"
+  }
+}

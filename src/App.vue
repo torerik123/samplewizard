@@ -17,20 +17,21 @@
 				>
 					<v-col>
 						<v-card-title>SampleWizard</v-card-title>
+						<v-card-title>{{ message }}</v-card-title>
 					</v-col>
 				</v-row>
 				<v-row 
 					dense 
 					no-gutters
 				>	
-					<v-spacer></v-spacer>
+					<v-spacer />
 					<v-col cols="auto">
 						<v-btn
 							v-if="!isRecording && !audioSrc"
 							prepend-icon="mdi-radiobox-marked"
-							@click="setRecordingStatus('start-recording')"
 							class="elevation-0"
 							size="x-large"
+							@click="setRecordingStatus('start-recording')"
 						>
 							<template #prepend>
 								<v-icon 
@@ -42,15 +43,15 @@
 						</v-btn>
 						<v-btn
 							v-if="isRecording && !audioSrc"
-							@click="setRecordingStatus('stop-recording')"
 							prepend-icon="mdi-stop"
 							class="elevation-0"
 							size="x-large"
+							@click="setRecordingStatus('stop-recording')"
 						>
 							Stop recording
 						</v-btn>
 					</v-col>
-					<v-spacer></v-spacer>
+					<v-spacer />
 				</v-row>
 		
 
@@ -72,11 +73,14 @@
 					</v-col>
 
 					<!-- Delete  -->
-					<v-col cols="auto" class="pl-3">
+					<v-col
+						cols="auto"
+						class="pl-3"
+					>
 						<v-btn
-							@click="audioSrc = null"
 							icon="mdi-trash-can"
 							class="elevation-0"
+							@click="audioSrc = null"
 						/>
 					</v-col>
 				</v-row>
@@ -86,16 +90,36 @@
 					v-if="audioSrc"
 					dense
 				>
-					<v-col>
-						<v-btn 
-							@click="downloadFile"
+					<v-col 
+						cols="auto"
+						class="py-0"
+					>
+						<v-btn
+							style="height: 100%;" 
 							text="Download"
 							class="elevation-0"
 							prepend-icon="mdi-download-outline"
 							size="x-large"
 							color="success"
+							@click="downloadFile"
 						/>
 					</v-col>
+					<v-col 
+						cols="" 
+						class="py-0"
+					>
+						<v-select
+							:v-model="audioFormat"
+							:model-value="audioFormat"
+							:items="['WAV', 'MP3', 'WEBM']"
+							hide-details
+							label="Format"
+							variant="solo"
+							flat
+							class="elevation-0"
+							color="success"
+						/>
+					</v-col>	
 				</v-row>			
 			</v-sheet>
 			
@@ -106,12 +130,14 @@
 				width="400"
 				class="pa-8"
 			>
-				<v-card-text class="text-body-1">You are not logged in.</v-card-text>
+				<v-card-text class="text-body-1">
+					You are not logged in.
+				</v-card-text>
 
 				<v-btn 
-					@click="login"
 					class="elevation-0"
 					size="x-large"
+					@click="login"
 				>
 					Log in
 				</v-btn>
@@ -122,13 +148,76 @@
 
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import ExtPay from "../ExtPay.js";
+import { ref, onMounted } from 'vue'
+import ExtPay from "../ExtPay.js"
+import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { fetchFile, toBlobURL } from '@ffmpeg/util'
+
+// TODO 
+const baseURL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm'
+
+const message = ref('Click Start to Transcode')
+
+const base64ToBlob = (base64, mimeType) => {
+    const bytes = atob(base64.split(',')[1]);
+    let { length } = bytes;
+    const out = new Uint8Array(length);
+
+    while (length--) {
+        out[length] = bytes.charCodeAt(length);
+    }
+
+    return new Blob([out], { type: mimeType });
+}
+
+const transcode = async (base64AudioData) => {
+	// Convert base64 string to blob for transcoding 
+	const audioBlob = base64ToBlob(base64AudioData, 'audio/webm');
+	const audioUrl = URL.createObjectURL(audioBlob);
+
+	// Decode the audio data from WebM into a raw audio format that can be manipulated or re-encoded.
+	const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+	const audioSource = audioContext.createBufferSource()
+	
+	const response = await fetch(audioUrl)
+	const buffer = await response.arrayBuffer()
+	const decodedAudio = await audioContext.decodeAudioData(buffer)
+	audioSource.buffer = decodedAudio
+
+	// Transcode to MP3/WAV with FFmpeg
+	const ffmpeg = new FFmpeg()
+
+	const originalFile = await fetchFile(audioSource.buffer)
+	console.warn(originalFile)
+	message.value = 'Loading ffmpeg-core.js'
+	
+	ffmpeg.on('log', message  => {
+		message.value = message
+	})
+
+	await ffmpeg.load()
+
+	console.warn("--LOADED", ffmpeg)
+	message.value = 'Start transcoding'
+
+	await ffmpeg.writeFile('test.webm', await fetchFile(originalFile))
+	await ffmpeg.exec(['-i', 'test.webm', 'test.mp3'])
+
+	message.value = 'Complete transcoding'
+
+	const data = await ffmpeg.readFile('test.mp3')
+
+	const transcodedAudio = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' }))
+
+	console.log("--TRANSCODED => ", transcodedAudio)
+}
+
 
 const extpay = ExtPay('samplewizard')
 const audioSrc = ref(false)
 const user = ref(false)
 const isRecording = ref(false)
+const audioFormat = ref("WAV")
 
 const login = () => {
 	extpay.openPaymentPage()
@@ -137,7 +226,7 @@ const login = () => {
 onMounted( async () => {
 	const authUser = await extpay.getUser()
 
-	if (authUser?.paid) {
+	if (authUser?.paid) {	
 		user.value = authUser
 	}
 	 
@@ -154,7 +243,9 @@ onMounted( async () => {
 		(c) => c.contextType === 'OFFSCREEN_DOCUMENT'
 	)
 
-	isRecording.value = offscreenDocument.documentUrl.endsWith('#recording')
+	isRecording.value = offscreenDocument?.documentUrl?.endsWith('#recording')
+
+	// TODO => Clears recorded audio if window is closed before download
 })
 
 const setRecordingStatus = async (status) => {
@@ -165,14 +256,34 @@ const setRecordingStatus = async (status) => {
 	})
 }
 
-const downloadFile = () => {
+const downloadFile = async  () => {
 	// TODO => Convert webm to mp3/wav
+	const blob = dataURIToBlob(audioSrc.value)
+	
+	const file = await transcode(audioSrc.value)
 
-	// TODO => Not playing properly in VLC => missing audio codec?
-	// set bitrate, author url? 
-	chrome.downloads.download({	url: audioSrc.value })
-	console.log("downloaded file", audioSrc.value)
+	console.log(file)
+	// chrome.downloads.download({	url: mp3 })
+	// chrome.downloads.download({	url: audioSrc.value })
+	console.log("File downloaded!")
 }	
+
+const dataURIToBlob = (dataURI) => {
+	// https://gist.github.com/fupslot/5015897
+	// Convert base64 string to blob so we can transcode to wav/mp3
+    dataURI = dataURI.replace(/^data:/, '');
+
+    const type = dataURI.match(/image\/[^;]+/);
+    const base64 = dataURI.replace(/^[^,]+,/, '');
+    const arrayBuffer = new ArrayBuffer(base64.length);
+    const typedArray = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < base64.length; i++) {
+        typedArray[i] = base64.charCodeAt(i);
+    }
+
+    return new Blob([arrayBuffer], {type});
+}
 
 </script>
 

@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "SampleWizard",
+  "version": "1.0.0",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "permissions": [
+    "tabs",
+    "tabCapture",
+    "activeTab",
+    "tabCapture",
+    "offscreen",
+    "unlimitedStorage",
+    "storage",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://extensionpay.com/*"
+  ],
+  "commands": {
+    "showcontentdialog": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y"
+      },
+      "description": "show content dialog"
+    }
+  }
+}

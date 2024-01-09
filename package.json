@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.10",
+    "@ffmpeg/util": "^0.12.1",
     "@mdi/font": "^7.4.47",
     "vue": "^3.3.11",
     "vuetify": "^3.4.8"

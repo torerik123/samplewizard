@@ -45,21 +45,19 @@ async function startRecording(streamId) {
 
 	recorder.ondataavailable = (event) => data.push(event.data);
 	recorder.onstop = () => {
-		const blob = new Blob(data, { type: "video/webm; codecs=opus" });
+		const blob = new Blob(data, { type: "video/webm; codecs=opus" })
 
 		// Encode to base64 => send to app.vue
-		let reader = new FileReader();
-        reader.readAsDataURL(blob);
+		let reader = new FileReader()
+        reader.readAsDataURL(blob)
         reader.onloadend = function () {
-        	let base64String = reader.result;
+        	let base64String = reader.result
 
 			chrome.runtime.sendMessage({
 				type: "save-recording",
 				data: base64String,
 			})
         } 
-
-		// window.open();
 
 		// Clear state ready for next recording
 		recorder = undefined;
