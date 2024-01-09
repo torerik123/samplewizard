@@ -17,7 +17,6 @@
 				>
 					<v-col>
 						<v-card-title>SampleWizard</v-card-title>
-						<v-card-title>{{ message }}</v-card-title>
 					</v-col>
 				</v-row>
 				<v-row 
@@ -101,6 +100,7 @@
 							prepend-icon="mdi-download-outline"
 							size="x-large"
 							color="success"
+							:loading="isTranscodingAudio"
 							@click="downloadFile"
 						/>
 					</v-col>
@@ -109,9 +109,10 @@
 						class="py-0"
 					>
 						<v-select
-							:v-model="audioFormat"
-							:model-value="audioFormat"
-							:items="['WAV', 'MP3', 'WEBM']"
+							v-model="selectedAudioFormat"
+							:items="audioFormats"
+							item-title="title"
+							item-value="value"
 							hide-details
 							label="Format"
 							variant="solo"
@@ -150,93 +151,18 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import ExtPay from "../ExtPay.js"
-import { FFmpeg } from '@ffmpeg/ffmpeg'
 import * as toWav from "audiobuffer-to-wav"
-// import { fetchFile, toBlobURL } from '@ffmpeg/util'
 
-// TODO 
-const baseURL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm'
-
-const message = ref('Click Start to Transcode')
-
-const base64ToBlob = (base64, mimeType) => {
-    const bytes = atob(base64.split(',')[1]);
-    let { length } = bytes;
-    const out = new Uint8Array(length);
-
-    while (length--) {
-        out[length] = bytes.charCodeAt(length);
-    }
-
-    return new Blob([out], { type: mimeType });
-}
-
-const transcode = async (base64AudioData) => {
-	// TODO => error handling
-	// Convert base64 string to blob for transcoding 
-	const audioBlob = base64ToBlob(base64AudioData, 'audio/webm');
-	const audioUrl = URL.createObjectURL(audioBlob);
-
-	// Decode the audio data from WebM into a raw audio format that can be manipulated or re-encoded.
-	const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-	const audioSource = audioContext.createBufferSource()
-	
-	const response = await fetch(audioUrl)
-	const buffer = await response.arrayBuffer()
-	const decodedAudio = await audioContext.decodeAudioData(buffer)
-	audioSource.buffer = decodedAudio
-
-	// TODO 
-	// MP3 
-	// const mp3Encoder = new lamejs.Mp3Encoder(1, 44100, 320)
-	// const mp3Blob = new Blob(mp3Packets, { type: 'audio/mp3' });
-	// const mp3Url = URL.createObjectURL(mp3Blob);
-	// console.warn("__MP3", mp3Url)
-
-
-	// Cleanup
-	// URL.revokeObjectURL(audioUrl)
-	// URL.revokeObjectURL(mp3Url)
-
-	// WAV 
-	const wav = toWav(decodedAudio)  // using the audiobuffer-to-wav library
-	const wavBlob = new Blob([new Uint8Array(wav)], { type: 'audio/wav' })
-	const wavUrl = URL.createObjectURL(wavBlob)
-	return wavUrl
-	// Transcode to MP3/WAV with FFmpeg???
-	const ffmpeg = new FFmpeg()
-
-	const originalFile = await fetchFile(audioSource.buffer)
-	console.warn(originalFile)
-	message.value = 'Loading ffmpeg-core.js'
-	
-	ffmpeg.on('log', message  => {
-		message.value = message
-	})
-
-	await ffmpeg.load()
-
-	console.warn("--LOADED", ffmpeg)
-	message.value = 'Start transcoding'
-
-	await ffmpeg.writeFile('test.webm', await fetchFile(originalFile))
-	await ffmpeg.exec(['-i', 'test.webm', 'test.mp3'])
-
-	message.value = 'Complete transcoding'
-
-	const data = await ffmpeg.readFile('test.mp3')
-
-	const transcodedAudio = URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' }))
-
-	console.log("--TRANSCODED => ", transcodedAudio)
-}
-
-
+// Auth + Payment
 const extpay = ExtPay('samplewizard')
-const audioSrc = ref(false)
 const user = ref(false)
+
+// Audio
+const audioFormats = ref(["WAV", "MP3"])
+const audioSrc = ref(false)
 const isRecording = ref(false)
-const audioFormat = ref("WAV")
+const isTranscodingAudio = ref(false)
+const selectedAudioFormat = ref("WAV")
 
 const login = () => {
 	extpay.openPaymentPage()
@@ -276,32 +202,73 @@ const setRecordingStatus = async (status) => {
 }
 
 const downloadFile = async  () => {
-	// TODO => Convert webm to mp3/wav
-	const blob = dataURIToBlob(audioSrc.value)
-	const file = await transcode(audioSrc.value)
-
-	chrome.downloads.download({	url: file })
-	// chrome.downloads.download({	url: audioSrc.value })
-	console.log("File downloaded!")
-}	
-
-const dataURIToBlob = (dataURI) => {
-	// https://gist.github.com/fupslot/5015897
-	// Convert base64 string to blob so we can transcode to wav/mp3
-    dataURI = dataURI.replace(/^data:/, '');
-
-    const type = dataURI.match(/image\/[^;]+/);
-    const base64 = dataURI.replace(/^[^,]+,/, '');
-    const arrayBuffer = new ArrayBuffer(base64.length);
-    const typedArray = new Uint8Array(arrayBuffer);
-
-    for (let i = 0; i < base64.length; i++) {
-        typedArray[i] = base64.charCodeAt(i);
-    }
-
-    return new Blob([arrayBuffer], {type});
+	try {
+		const file = await transcode(audioSrc.value, selectedAudioFormat.value)
+		chrome.downloads.download({	url: file })
+		console.log("File downloaded!")
+	} catch (error) {
+		alert("Something went wrong, please try again later")
+	}
 }
 
+const transcode = async (base64AudioData, outputFormat) => {
+	isTranscodingAudio.value = true
+
+	if (!outputFormat) {
+		throw Error("Missing output audio format")
+	}
+
+	let transcodedAudio = null 
+	
+	try {
+		// Convert base64 string to blob for transcoding
+		const audioBlob = base64ToBlob(base64AudioData, 'audio/webm');
+		const audioUrl = URL.createObjectURL(audioBlob);
+
+		// Decode the audio data from WebM into a raw audio format that can be manipulated or re-encoded.
+		const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+		const audioSource = audioContext.createBufferSource()
+		
+		const response = await fetch(audioUrl)
+		const buffer = await response.arrayBuffer()
+		const decodedAudio = await audioContext.decodeAudioData(buffer)
+		audioSource.buffer = decodedAudio
+
+		if (outputFormat === "WAV") {
+			const wav = toWav(decodedAudio)
+			const wavBlob = new Blob([new Uint8Array(wav)], { type: 'audio/wav' })
+			transcodedAudio = URL.createObjectURL(wavBlob)
+		}
+
+		if (outputFormat === "MP3") {
+			throw Error("MP3 not implemented")
+			// TODO 
+			// MP3 
+			// const mp3Encoder = new lamejs.Mp3Encoder(2, 44100, 320)
+			// const mp3Blob = new Blob(mp3Packets, { type: 'audio/mp3' });
+			// const mp3Url = URL.createObjectURL(mp3Blob);
+			// console.warn("__MP3", mp3Url)
+		}
+	} catch (error) {
+		console.log(error)
+	} finally {
+		isTranscodingAudio.value = false
+	}
+
+	return transcodedAudio
+}
+
+const base64ToBlob = (base64, mimeType) => {
+    const bytes = atob(base64.split(',')[1]);
+    let { length } = bytes;
+    const out = new Uint8Array(length);
+
+    while (length--) {
+        out[length] = bytes.charCodeAt(length);
+    }
+
+    return new Blob([out], { type: mimeType });
+}	
 </script>
 
 <style>
