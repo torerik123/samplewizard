@@ -151,7 +151,8 @@
 import { ref, onMounted } from 'vue'
 import ExtPay from "../ExtPay.js"
 import { FFmpeg } from '@ffmpeg/ffmpeg'
-import { fetchFile, toBlobURL } from '@ffmpeg/util'
+import * as toWav from "audiobuffer-to-wav"
+// import { fetchFile, toBlobURL } from '@ffmpeg/util'
 
 // TODO 
 const baseURL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm'
@@ -171,6 +172,7 @@ const base64ToBlob = (base64, mimeType) => {
 }
 
 const transcode = async (base64AudioData) => {
+	// TODO => error handling
 	// Convert base64 string to blob for transcoding 
 	const audioBlob = base64ToBlob(base64AudioData, 'audio/webm');
 	const audioUrl = URL.createObjectURL(audioBlob);
@@ -184,7 +186,24 @@ const transcode = async (base64AudioData) => {
 	const decodedAudio = await audioContext.decodeAudioData(buffer)
 	audioSource.buffer = decodedAudio
 
-	// Transcode to MP3/WAV with FFmpeg
+	// TODO 
+	// MP3 
+	// const mp3Encoder = new lamejs.Mp3Encoder(1, 44100, 320)
+	// const mp3Blob = new Blob(mp3Packets, { type: 'audio/mp3' });
+	// const mp3Url = URL.createObjectURL(mp3Blob);
+	// console.warn("__MP3", mp3Url)
+
+
+	// Cleanup
+	// URL.revokeObjectURL(audioUrl)
+	// URL.revokeObjectURL(mp3Url)
+
+	// WAV 
+	const wav = toWav(decodedAudio)  // using the audiobuffer-to-wav library
+	const wavBlob = new Blob([new Uint8Array(wav)], { type: 'audio/wav' })
+	const wavUrl = URL.createObjectURL(wavBlob)
+	return wavUrl
+	// Transcode to MP3/WAV with FFmpeg???
 	const ffmpeg = new FFmpeg()
 
 	const originalFile = await fetchFile(audioSource.buffer)
@@ -259,11 +278,9 @@ const setRecordingStatus = async (status) => {
 const downloadFile = async  () => {
 	// TODO => Convert webm to mp3/wav
 	const blob = dataURIToBlob(audioSrc.value)
-	
 	const file = await transcode(audioSrc.value)
 
-	console.log(file)
-	// chrome.downloads.download({	url: mp3 })
+	chrome.downloads.download({	url: file })
 	// chrome.downloads.download({	url: audioSrc.value })
 	console.log("File downloaded!")
 }	
