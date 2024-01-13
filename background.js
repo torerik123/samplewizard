@@ -28,6 +28,9 @@ chrome.commands.onCommand.addListener(function(command) {
 chrome.runtime.onMessage.addListener(async(message) => {
 	switch (message.type) {
 		case "start-recording":
+			chrome.action.setBadgeBackgroundColor({ color: 'red' })
+			chrome.action.setBadgeText({ text: ' ' })
+
 			let recording = false;
 			const { id } = await getCurrentTab()
 			const existingContexts = await chrome.runtime.getContexts({});
@@ -67,6 +70,7 @@ chrome.runtime.onMessage.addListener(async(message) => {
 				target: 'offscreen'
 			});
 
+			chrome.action.setBadgeText({ text: '' })
 		break
 
 		case "save-recording":
