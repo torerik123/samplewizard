@@ -89,21 +89,24 @@
 					v-if="audioSrc"
 					dense
 				>
+				<!-- cols="auto" -->
 					<v-col 
-						cols="auto"
 						class="py-0"
 					>
 						<v-btn
-							style="height: 100%;" 
 							text="Download"
 							class="elevation-0"
 							prepend-icon="mdi-download-outline"
 							size="x-large"
 							color="success"
+							block
 							:loading="isTranscodingAudio"
 							@click="downloadFile"
 						/>
 					</v-col>
+					<!-- TODO => OPTION TO CONVERT TO MP3 -->
+
+					<!-- 
 					<v-col 
 						cols="" 
 						class="py-0"
@@ -120,7 +123,8 @@
 							class="elevation-0"
 							color="success"
 						/>
-					</v-col>	
+					</v-col>
+					-->	
 				</v-row>			
 			</v-sheet>
 			
@@ -207,6 +211,7 @@ const downloadFile = async  () => {
 		chrome.downloads.download({	url: file })
 		console.log("File downloaded!")
 	} catch (error) {
+		console.log(error)
 		alert("Something went wrong, please try again later")
 	}
 }
@@ -234,23 +239,17 @@ const transcode = async (base64AudioData, outputFormat) => {
 		const decodedAudio = await audioContext.decodeAudioData(buffer)
 		audioSource.buffer = decodedAudio
 
-		if (outputFormat === "WAV") {
-			const wav = toWav(decodedAudio)
-			const wavBlob = new Blob([new Uint8Array(wav)], { type: 'audio/wav' })
-			transcodedAudio = URL.createObjectURL(wavBlob)
-		}
+		// WAV 
+		const wav = toWav(decodedAudio)
+		const wavBlob = new Blob([new Uint8Array(wav)], { type: 'audio/wav' })
+		transcodedAudio = URL.createObjectURL(wavBlob)
 
 		if (outputFormat === "MP3") {
-			throw Error("MP3 not implemented")
 			// TODO 
-			// MP3 
-			// const mp3Encoder = new lamejs.Mp3Encoder(2, 44100, 320)
-			// const mp3Blob = new Blob(mp3Packets, { type: 'audio/mp3' });
-			// const mp3Url = URL.createObjectURL(mp3Blob);
-			// console.warn("__MP3", mp3Url)
 		}
 	} catch (error) {
 		console.log(error)
+		return error
 	} finally {
 		isTranscodingAudio.value = false
 	}
