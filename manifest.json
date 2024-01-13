@@ -3,8 +3,13 @@
 	"name": "SampleWizard",
 	"version": "1.0.0",
 	"action": { 
-		"default_popup": "index.html" 
+		"default_popup": "index.html"
+		 
 	},
+	"icons": {
+		"48": "hat48.png",
+		"128": "witch-hat.png"
+	  },
 	"background": {
 		"service_worker": "background.js",
 		"scripts": [ "Extpay.js" ],
