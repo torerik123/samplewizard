@@ -155,7 +155,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import ExtPay from "../ExtPay.js"
-import * as toWav from "audiobuffer-to-wav"
+import audioBufferToWav from "audiobuffer-to-wav"
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
@@ -240,7 +240,7 @@ const transcode = async (base64AudioData, outputFormat) => {
 		audioSource.buffer = decodedAudio
 
 		// WAV 
-		const wav = toWav(decodedAudio)
+		const wav = audioBufferToWav(decodedAudio)
 		const wavBlob = new Blob([new Uint8Array(wav)], { type: 'audio/wav' })
 		transcodedAudio = URL.createObjectURL(wavBlob)
 
@@ -253,7 +253,7 @@ const transcode = async (base64AudioData, outputFormat) => {
 	} finally {
 		isTranscodingAudio.value = false
 	}
-
+	console.warn("FILE:", transcodedAudio)
 	return transcodedAudio
 }
 

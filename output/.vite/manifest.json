@@ -1,6 +1,6 @@
 {
   "../../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-psLHLRBP.js",
+    "file": "assets/crx-manifest.js-KyNVrfbx.js",
     "isEntry": true,
     "src": "../../../../@crx/manifest"
   },
@@ -10,7 +10,7 @@
     "src": "ExtPay.js"
   },
   "background.js": {
-    "file": "assets/background.js-xMvqdcrO.js",
+    "file": "assets/background.js-Eqwdgjcc.js",
     "imports": [
       "ExtPay.js"
     ],
@@ -27,7 +27,7 @@
     "css": [
       "assets/index-k0AVCwQs.css"
     ],
-    "file": "assets/index.html-kvm9Nty-.js",
+    "file": "assets/index.html-SRHvnkqb.js",
     "imports": [
       "ExtPay.js"
     ],
@@ -49,10 +49,5 @@
   "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2": {
     "file": "assets/materialdesignicons-webfont-6eb_lmTU.woff2",
     "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2"
-  },
-  "offscreen.html": {
-    "file": "assets/offscreen-k52RqIHf.js",
-    "isEntry": true,
-    "src": "offscreen.html"
   }
 }

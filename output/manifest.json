@@ -5,6 +5,10 @@
   "action": {
     "default_popup": "index.html"
   },
+  "icons": {
+    "48": "hat48.png",
+    "128": "witch-hat.png"
+  },
   "background": {
     "service_worker": "service-worker-loader.js",
     "type": "module"
