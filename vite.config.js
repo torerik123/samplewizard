@@ -1,16 +1,20 @@
 import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
 import { crx } from "@crxjs/vite-plugin"
-import manifest from "./manifest.json" // Node 14 & 16
+import manifest from "./manifest.json"
 import commonjs from '@rollup/plugin-commonjs'
 import mergePermissions from "./mergePermissions"
+// import { resolve } from 'path';
 
 export default defineConfig({
-	plugins: [vue(), crx({ manifest }), ,],
+	plugins: [vue(), crx({ manifest })],
 
 	build: {
 		rollupOptions: {
 			input: {
+
+				// WORKS WITHOUT THIS PART
+				// popup: resolve(__dirname, "index.html"),
 				// offscreen: "offscreen.html",
 				// type: "module",
 			},
@@ -23,10 +27,10 @@ export default defineConfig({
 		modulePreload: false,
 	},
 	server: {
-		port: 5173,
+		port: 3000,
 		strictPort: true,
 		hmr: {
-			port: 5173,
+			port: 3000,
 		},
 	},
 });

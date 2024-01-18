@@ -14,8 +14,6 @@
     "type": "module"
   },
   "permissions": [
-    "tabs",
-    "tabCapture",
     "activeTab",
     "tabCapture",
     "offscreen",
