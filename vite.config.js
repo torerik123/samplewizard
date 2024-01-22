@@ -4,29 +4,27 @@ import { crx } from "@crxjs/vite-plugin"
 import manifest from "./manifest.json"
 import commonjs from '@rollup/plugin-commonjs'
 import mergePermissions from "./mergePermissions"
+
 // import { resolve } from 'path';
 
 export default defineConfig({
 	plugins: [vue(), crx({ manifest })],
-
 	build: {
 		rollupOptions: {
-			input: {
-
-				// WORKS WITHOUT THIS PART
-				// popup: resolve(__dirname, "index.html"),
-				// offscreen: "offscreen.html",
-				// type: "module",
-			},
+			input: "Extpay.js",
 			output: {
 				dir: 'output',
 				format: 'cjs'
 			},
-			plugins: [commonjs(), mergePermissions({ permissions: ["offscreen"] }) ],
+			plugins: [
+				commonjs({strictRequires: true, }), 
+				mergePermissions({ permissions: ["offscreen"] }) 
+			],
 		},
 		modulePreload: false,
 	},
 	server: {
+		host:"localhost",
 		port: 3000,
 		strictPort: true,
 		hmr: {
@@ -34,7 +32,7 @@ export default defineConfig({
 		},
 	},
 	preview: {
-		port: 3000,
+		port: 8000,
 		strictPort: true,
 	},
 });

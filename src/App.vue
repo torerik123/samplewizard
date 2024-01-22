@@ -89,7 +89,7 @@
 					v-if="audioSrc"
 					dense
 				>
-				<!-- cols="auto" -->
+					<!-- cols="auto" -->
 					<v-col 
 						class="py-0"
 					>
@@ -154,7 +154,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import ExtPay from "../ExtPay.js"
+import ExtPay from "../Extpay.js"
 import audioBufferToWav from "audiobuffer-to-wav"
 
 // Auth + Payment
