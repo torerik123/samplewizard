@@ -11,12 +11,14 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "audiobuffer-to-wav": "^1.0.0",
+    "extpay": "^3.0.7",
     "vue": "^3.3.11",
     "vuetify": "^3.4.8"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.21",
     "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@vitejs/plugin-vue": "^4.5.2",
     "vite": "^5.0.8"
   }

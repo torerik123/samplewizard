@@ -1,4 +1,4 @@
-import ExtPay from "./Extpay.js";
+import ExtPay from "ExtPay"
 
 const extpay = ExtPay('samplewizard')
 extpay.startBackground(); // this line is required to use ExtPay in the rest of your extension
