@@ -154,8 +154,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-// import ExtPay from "extpay"
-import ExtPay from "ExtPay"
+import ExtPay from "../ExtPay.js"
 import audioBufferToWav from "audiobuffer-to-wav"
 
 // Auth + Payment
