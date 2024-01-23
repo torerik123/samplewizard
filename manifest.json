@@ -20,7 +20,8 @@
 		"tabCapture",
 		"offscreen",
 		"unlimitedStorage",
-		"storage"
+		"storage",
+		"downloads"
 	],
 	"host_permissions": [
 		"https://extensionpay.com/*"
