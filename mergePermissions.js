@@ -1,4 +1,3 @@
-
 import { readFile, writeFile } from 'fs/promises';
 
 // Fix issue with bundling offscreen.html for build 

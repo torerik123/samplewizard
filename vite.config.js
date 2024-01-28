@@ -6,17 +6,6 @@ import manifest from "./manifest.json"
 export default defineConfig({
 	plugins: [vue(), crx({ manifest })],
 	build: {
-		// rollupOptions: {
-		// 	input: "Extpay.js",
-		// 	output: {
-		// 		dir: 'output',
-		// 		format: 'cjs'
-		// 	},
-		// 	plugins: [
-		// 		commonjs({strictRequires: true, }), 
-		// 		mergePermissions({ permissions: ["offscreen"] }) 
-		// 	],
-		// },
 		modulePreload: false,
 	},
 	server: {

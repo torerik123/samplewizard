@@ -4,7 +4,10 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 export default {
 	rollupOptions: {
-		input: "src/main.js",
+		input: {
+			main: "src/main.js",
+			offscreen: "offscreen.html"
+		},
 		output: {
 			dir: "output",
 			format: "cjs",

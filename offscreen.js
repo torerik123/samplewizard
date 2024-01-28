@@ -1,10 +1,10 @@
 chrome.runtime.onMessage.addListener(async (message) => {
 	if (message.target === "offscreen") {
 		switch (message.type) {
-			case "start-recording":
+			case "start-offscreen-recording":
 				startRecording(message.data);
 				break;
-			case "stop-recording":
+			case "stop-offscreen-recording":
 				stopRecording();
 				break;
 			default:

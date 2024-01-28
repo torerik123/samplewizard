@@ -15,6 +15,12 @@
 		"scripts": [ "Extpay.js" ],
 		"type": "module"
 	},
+	"web_accessible_resources": [
+		{
+		"resources": ["offscreen.html"],
+		"matches": ["https://*.google.com/*"]
+		}
+	],
 	"permissions": [
 		"activeTab",
 		"tabCapture",

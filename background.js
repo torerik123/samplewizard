@@ -4,7 +4,7 @@ const extpay = ExtPay('samplewizard')
 extpay.startBackground(); // this line is required to use ExtPay in the rest of your extension
 
 extpay.getUser().then(user => {
-	console.log(user)
+	console.log("user:", user)
 })
 
 const getCurrentTab = async () => {
@@ -28,27 +28,47 @@ chrome.commands.onCommand.addListener(function(command) {
 chrome.runtime.onMessage.addListener(async(message) => {
 	switch (message.type) {
 		case "start-recording":
+			//  // Check all windows controlled by the service worker to see if one
+			// // of them is the offscreen document with the given path
+			// const offscreenUrl = chrome.runtime.getURL(path);
+			// const existingContexts = await chrome.runtime.getContexts({
+			// 	contextTypes: ['OFFSCREEN_DOCUMENT'],
+			// 	documentUrls: [offscreenUrl]
+			// });
+
+
 			chrome.action.setBadgeBackgroundColor({ color: 'red' })
 			chrome.action.setBadgeText({ text: ' ' })
 
 			let recording = false;
 			const { id } = await getCurrentTab()
-			const existingContexts = await chrome.runtime.getContexts({});
-			const offscreenDocument = existingContexts.find(
-				(c) => c.contextType === 'OFFSCREEN_DOCUMENT'
-			);
+			const offscreenDocument = await chrome.runtime.getContexts({
+				contextTypes: ['OFFSCREEN_DOCUMENT'],
+			});
 
+			console.warn("OFFSCREEN DOC", offscreenDocument)
 
 			// If an offscreen document is not already open, create one.
-			if (!offscreenDocument) {
-				// Create an offscreen document.
-				await chrome.offscreen.createDocument({
-				url: 'offscreen.html',
-				reasons: ['USER_MEDIA'],
-				justification: 'Recording from chrome.tabCapture API'
-				});
+			if (!offscreenDocument.length) {
+				console.warn("CREATING OFFSCREEN DOC")
+
+				try {
+					// Create an offscreen document.
+					await chrome.offscreen.createDocument({
+					url: 'offscreen.html',
+					reasons: ['USER_MEDIA'],
+					justification: 'Recording from chrome.tabCapture API'
+					});
+	
+					const newDoc = await chrome.runtime.getContexts({
+						contextTypes: ['OFFSCREEN_DOCUMENT'],
+					});
+					console.warn("DOCUMENT CREATED", newDoc)
+				} catch (error) {
+					console.log(error)
+				}
 			} else {
-				recording = offscreenDocument.documentUrl.endsWith('#recording')
+				recording = offscreenDocument[0].documentUrl.endsWith('#recording')
 			}
 
 			// Get a MediaStream for the active tab.
@@ -58,7 +78,7 @@ chrome.runtime.onMessage.addListener(async(message) => {
 
 			// Send the stream ID to the offscreen document to start recording.
 			chrome.runtime.sendMessage({
-				type: 'start-recording',
+				type: 'start-offscreen-recording',
 				target: 'offscreen',
 				data: streamId
 			});
@@ -66,7 +86,7 @@ chrome.runtime.onMessage.addListener(async(message) => {
 
 		case "stop-recording":
 			chrome.runtime.sendMessage({
-				type: 'stop-recording',
+				type: 'stop-offscreen-recording',
 				target: 'offscreen'
 			});
 
@@ -83,12 +103,13 @@ chrome.runtime.onMessage.addListener(async(message) => {
 
 				const result = await chrome.storage.local.get(["recording_" + timestamp])
 
+				await chrome.offscreen.closeDocument()
+				console.warn("CLOSING DOC")
+				
 				chrome.runtime.sendMessage({
 					type: "recording-saved",
 					data: { id: timestamp },
 				})
-
-				chrome.offscreen.closeDocument()
 			} catch(error) {
 				console.log(error);
 			}

@@ -162,7 +162,7 @@ const extpay = ExtPay('samplewizard')
 const user = ref(false)
 
 // Audio
-const audioFormats = ref(["WAV", "MP3"])
+// const audioFormats = ref(["WAV", "MP3"])
 const audioSrc = ref(false)
 const isRecording = ref(false)
 const isTranscodingAudio = ref(false)
