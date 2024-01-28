@@ -14,7 +14,6 @@ const getCurrentTab = async () => {
 	 };
     // `tab` will either be a `tabs.Tab` instance or `undefined`.
     let [tab] = await chrome.tabs.query(queryOptions);
-	console.log(tab)
     return tab;
   }
 
@@ -28,15 +27,6 @@ chrome.commands.onCommand.addListener(function(command) {
 chrome.runtime.onMessage.addListener(async(message) => {
 	switch (message.type) {
 		case "start-recording":
-			//  // Check all windows controlled by the service worker to see if one
-			// // of them is the offscreen document with the given path
-			// const offscreenUrl = chrome.runtime.getURL(path);
-			// const existingContexts = await chrome.runtime.getContexts({
-			// 	contextTypes: ['OFFSCREEN_DOCUMENT'],
-			// 	documentUrls: [offscreenUrl]
-			// });
-
-
 			chrome.action.setBadgeBackgroundColor({ color: 'red' })
 			chrome.action.setBadgeText({ text: ' ' })
 
@@ -46,12 +36,8 @@ chrome.runtime.onMessage.addListener(async(message) => {
 				contextTypes: ['OFFSCREEN_DOCUMENT'],
 			});
 
-			console.warn("OFFSCREEN DOC", offscreenDocument)
-
 			// If an offscreen document is not already open, create one.
 			if (!offscreenDocument.length) {
-				console.warn("CREATING OFFSCREEN DOC")
-
 				try {
 					// Create an offscreen document.
 					await chrome.offscreen.createDocument({
@@ -63,7 +49,6 @@ chrome.runtime.onMessage.addListener(async(message) => {
 					const newDoc = await chrome.runtime.getContexts({
 						contextTypes: ['OFFSCREEN_DOCUMENT'],
 					});
-					console.warn("DOCUMENT CREATED", newDoc)
 				} catch (error) {
 					console.log(error)
 				}
@@ -94,7 +79,7 @@ chrome.runtime.onMessage.addListener(async(message) => {
 		break
 
 		case "save-recording":
-			const timestamp = Date.now()
+			const timestamp = Date.now()	
 
 			try {
 				await chrome.storage.local.set({
@@ -104,7 +89,6 @@ chrome.runtime.onMessage.addListener(async(message) => {
 				const result = await chrome.storage.local.get(["recording_" + timestamp])
 
 				await chrome.offscreen.closeDocument()
-				console.warn("CLOSING DOC")
 				
 				chrome.runtime.sendMessage({
 					type: "recording-saved",

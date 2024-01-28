@@ -17,8 +17,8 @@
 	},
 	"web_accessible_resources": [
 		{
-		"resources": ["offscreen.html"],
-		"matches": ["https://*.google.com/*"]
+		"resources": ["offscreen.html", "offscreen.js"],
+		"matches": ["<all_urls>"]
 		}
 	],
 	"permissions": [
