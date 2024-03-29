@@ -2,7 +2,7 @@
 	<v-app>
 		<div
 			style="height: 100%;"
-			class="bg-cyan-lighten-4 d-flex align-center"
+			class="bg-black d-flex align-center"
 		>
 			<v-sheet
 				width="400"
@@ -15,7 +15,9 @@
 					class="pb-3"
 				>
 					<v-col>
-						<v-card-title>SampleWizard</v-card-title>
+						<v-card-title :style="`color: ${highlightColor};`">
+							SampleWizard
+						</v-card-title>
 					</v-col>
 				</v-row>
 				<v-row 
@@ -58,27 +60,12 @@
 					v-if="audioSrc"
 					dense
 					no-gutters
-					class="flex-nowrap"
+					class="flex-nowrap mb-4"
 				>
 					<v-col>
-						<audio 
-							id="recording" 
-							controls="true"
+						<AudioVisualizer 
 							:src="audioSrc"
-							type="audio/wav"
-							class="mb-5"
-						/>
-					</v-col>
-
-					<!-- Delete  -->
-					<v-col
-						cols="auto"
-						class="pl-3"
-					>
-						<v-btn
-							icon="mdi-trash-can"
-							class="elevation-0"
-							@click="deleteAudio"
+							@delete="deleteAudio"
 						/>
 					</v-col>
 				</v-row>
@@ -99,7 +86,7 @@
 							class="elevation-0"
 							prepend-icon="mdi-download-outline"
 							size="x-large"
-							color="success"
+							:color="highlightColor"
 							block
 							:loading="isTranscodingAudio"
 							@click="downloadFile"
@@ -119,7 +106,7 @@
 							variant="solo"
 							flat
 							class="elevation-0"
-							color="success"
+							:color="highlightColor"
 						/>
 					</v-col>
 				</v-row>
@@ -153,12 +140,18 @@ import { ref, onMounted, computed } from 'vue'
 import ExtPay from "../ExtPay.js"
 import audioBufferToWav from "audiobuffer-to-wav"
 
+// Components
+import AudioVisualizer from './components/AudioVisualizer.vue';
+
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
 const user = ref(false)
 const showLoginMessage = computed(() => {
 	return audioSrc.value && !user.value
 })
+
+// Styles
+const highlightColor = ref("#e255a1")
 
 // Audio
 const audioFormats = ref([
@@ -309,20 +302,5 @@ const base64ToBlob = (base64, mimeType) => {
 #app {
 	margin: 0px;
 	padding: 0px;
-}
-
-.logo {
-	height: 6em;
-	padding: 1.5em;
-	will-change: filter;
-	transition: filter 300ms;
-}
-
-.logo:hover {
-	filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.vue:hover {
-	filter: drop-shadow(0 0 2em #42b883aa);
 }
 </style>
