@@ -78,7 +78,7 @@
 						<v-btn
 							icon="mdi-trash-can"
 							class="elevation-0"
-							@click="audioSrc = null"
+							@click="deleteAudio"
 						/>
 					</v-col>
 				</v-row>
@@ -193,11 +193,21 @@ onMounted( async () => {
 		user.value = authUser
 	}
 	 
+	// Check for saved recordings 
+	const savedAudio = await chrome.storage.local.get(["new_recording"])
+	
+	if (savedAudio.new_recording) {
+		audioSrc.value = savedAudio.new_recording
+	}
+
 	chrome.runtime.onMessage.addListener(async(message) => { 
 		if (message.type === "recording-saved") {
-			const id = message.data.id
-			const result = await chrome.storage.local.get(["recording_" + id])
-			audioSrc.value = result["recording_" + id]	
+			// const id = message.data.id
+			// const result = await chrome.storage.local.get(["recording_" + id])
+			// audioSrc.value = result["recording_" + id]	
+			
+			const result = await chrome.storage.local.get(["new_recording"])
+			audioSrc.value = result["new_recording"]	
 		}
 	})
 
@@ -207,8 +217,6 @@ onMounted( async () => {
 	)
 
 	isRecording.value = offscreenDocument?.documentUrl?.endsWith('#recording')
-
-	// TODO => Clears recorded audio if window is closed before download
 })
 
 const setRecordingStatus = async (status) => {
@@ -217,6 +225,11 @@ const setRecordingStatus = async (status) => {
 	chrome.runtime.sendMessage({
 		type: status
 	})
+}
+
+const deleteAudio = () => {
+	audioSrc.value = null
+	chrome.storage.local.remove(["new_recording"])
 }
 
 const downloadFile = async  () => {
@@ -273,9 +286,9 @@ const transcode = async (base64AudioData, outputFormat) => {
 		console.log(error)
 		return error
 	} finally {
-		isTranscodingAudio.value = false
+		deleteAudio()
 	}
-	console.warn("FILE:", transcodedAudio)
+	
 	return transcodedAudio
 }
 

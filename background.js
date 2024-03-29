@@ -17,8 +17,8 @@ const getCurrentTab = async () => {
     return tab;
   }
 
-// Open with keyboard shortcut
 // TODO 
+// Open with keyboard shortcut
 // chrome.commands.onCommand.addListener(function(command) {
 // 	if( command.name == "showcontentdialog") {
 // 		chrome.tabs.executeScript({ file: "main.js" })
@@ -84,7 +84,8 @@ chrome.runtime.onMessage.addListener(async(message) => {
 
 			try {
 				await chrome.storage.local.set({
-					["recording_" + timestamp]: message.data
+					"new_recording": message.data
+					// ["recording_" + timestamp]: message.data
 				})
 
 				const result = await chrome.storage.local.get(["recording_" + timestamp])
