@@ -18,11 +18,12 @@ const getCurrentTab = async () => {
   }
 
 // Open with keyboard shortcut
-chrome.commands.onCommand.addListener(function(command) {
-	if( command.name == "showcontentdialog") {
-		chrome.tabs.executeScript({ file: "main.js" })
-	}
-})
+// TODO 
+// chrome.commands.onCommand.addListener(function(command) {
+// 	if( command.name == "showcontentdialog") {
+// 		chrome.tabs.executeScript({ file: "main.js" })
+// 	}
+// })
 
 chrome.runtime.onMessage.addListener(async(message) => {
 	switch (message.type) {

@@ -2,10 +2,9 @@
 	<v-app>
 		<div
 			style="height: 100%;"
-			class="bg-cyan-lighten-2 d-flex align-center"
+			class="bg-cyan-lighten-4 d-flex align-center"
 		>
 			<v-sheet
-				v-if="user"
 				width="400"
 				class="pa-5 align-items-center"
 				color="transparent"
@@ -88,12 +87,14 @@
 				<v-row 
 					v-if="audioSrc"
 					dense
+					class="mb-4"
 				>
 					<!-- cols="auto" -->
 					<v-col 
 						class="py-0"
 					>
 						<v-btn
+							style="height: 100%;"
 							text="Download"
 							class="elevation-0"
 							prepend-icon="mdi-download-outline"
@@ -104,11 +105,8 @@
 							@click="downloadFile"
 						/>
 					</v-col>
-					<!-- TODO => OPTION TO CONVERT TO MP3 -->
-
-					<!-- 
+					
 					<v-col 
-						cols="" 
 						class="py-0"
 					>
 						<v-select
@@ -124,28 +122,26 @@
 							color="success"
 						/>
 					</v-col>
-					-->	
-				</v-row>			
-			</v-sheet>
-			
-			<!-- Log in  -->
-			<v-sheet 
-				v-else
-				color="transparent"
-				width="400"
-				class="pa-8"
-			>
-				<v-card-text class="text-body-1">
-					You are not logged in.
-				</v-card-text>
+				</v-row>
 
-				<v-btn 
-					class="elevation-0"
-					size="x-large"
-					@click="login"
+				<!-- Log in  -->
+				<v-row 
+					v-if="showLoginMessage" 
+					dense 
 				>
-					Log in
-				</v-btn>
+					<v-col class="pa-0">
+						<p class="mb-2 text-caption">
+							To dowload files as WAV/MP3 you need a premium account. 
+						</p>
+						<v-btn
+							variant="outlined"
+							block
+							@click="login"
+						>
+							Log in/register
+						</v-btn>
+					</v-col>
+				</v-row>	
 			</v-sheet>
 		</div>
 	</v-app>
@@ -153,20 +149,38 @@
 
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import ExtPay from "../ExtPay.js"
 import audioBufferToWav from "audiobuffer-to-wav"
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
 const user = ref(false)
+const showLoginMessage = computed(() => {
+	return audioSrc.value && !user.value
+})
 
 // Audio
-// const audioFormats = ref(["WAV", "MP3"])
+const audioFormats = ref([
+	{
+		title: "WEBM",
+		value: "WEBM",
+	},
+	{
+		title: "WAV",
+		value: "WAV",
+		props: { disabled: showLoginMessage }
+	},
+	{
+		title: "MP3",
+		value: "MP3",
+		props: { disabled: true }
+	}
+])
 const audioSrc = ref(false)
 const isRecording = ref(false)
 const isTranscodingAudio = ref(false)
-const selectedAudioFormat = ref("WAV")
+const selectedAudioFormat = ref("WEBM")
 
 const login = () => {
 	extpay.openPaymentPage()
@@ -230,22 +244,30 @@ const transcode = async (base64AudioData, outputFormat) => {
 		const audioBlob = base64ToBlob(base64AudioData, 'audio/webm');
 		const audioUrl = URL.createObjectURL(audioBlob);
 
-		// Decode the audio data from WebM into a raw audio format that can be manipulated or re-encoded.
-		const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-		const audioSource = audioContext.createBufferSource()
+		switch (outputFormat) {
+			case "WEBM":
+				transcodedAudio = audioUrl
+				break;
+			case "WAV":
+				// Decode the audio data from WebM into a raw audio format that can be manipulated or re-encoded.
+				const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+				const audioSource = audioContext.createBufferSource()
+				
+				const response = await fetch(audioUrl)
+				const buffer = await response.arrayBuffer()
+				const decodedAudio = await audioContext.decodeAudioData(buffer)
+				audioSource.buffer = decodedAudio
 		
-		const response = await fetch(audioUrl)
-		const buffer = await response.arrayBuffer()
-		const decodedAudio = await audioContext.decodeAudioData(buffer)
-		audioSource.buffer = decodedAudio
-
-		// WAV 
-		const wav = audioBufferToWav(decodedAudio)
-		const wavBlob = new Blob([new Uint8Array(wav)], { type: 'audio/wav' })
-		transcodedAudio = URL.createObjectURL(wavBlob)
-
-		if (outputFormat === "MP3") {
-			// TODO 
+				// WAV 
+				const wav = audioBufferToWav(decodedAudio)
+				const wavBlob = new Blob([new Uint8Array(wav)], { type: 'audio/wav' })
+				transcodedAudio = URL.createObjectURL(wavBlob)
+				break;
+			case "MP3":
+				// TODO 
+				break;
+			default:
+				break;
 		}
 	} catch (error) {
 		console.log(error)
