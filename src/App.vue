@@ -122,6 +122,7 @@
 						</p>
 						<v-btn
 							variant="outlined"
+							:color="highlightColor"
 							block
 							@click="login"
 						>
@@ -302,5 +303,11 @@ const base64ToBlob = (base64, mimeType) => {
 #app {
 	margin: 0px;
 	padding: 0px;
+}
+
+button:hover, 
+button:hover .v-btn__content {
+	border-color: #FFF;
+	color: #FFF;
 }
 </style>

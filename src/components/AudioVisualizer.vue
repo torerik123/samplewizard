@@ -18,15 +18,16 @@
 	<v-row 
 		dense 
 	>
+		<v-spacer></v-spacer>
 		<v-col cols="auto">
 			<v-btn
 				:append-icon="isPlaying ? 'mdi-pause' : 'mdi-play'"
 				class="elevation-0"
 				:text="isPlaying ? 'Pause' : 'Play'"
+				color="success"
 				@click="togglePlay"
 			/>
 		</v-col>
-		<v-spacer></v-spacer>
 		<v-col cols="auto">
 			<v-btn
 				append-icon="mdi-trash-can"
