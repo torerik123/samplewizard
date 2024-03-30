@@ -15,9 +15,12 @@
 					class="pb-3"
 				>
 					<v-col>
-						<v-card-title :style="`color: ${highlightColor};`">
+						<h1 
+							class="logo"
+							:style="`color: ${highlightColor};`"
+						>
 							SampleWizard
-						</v-card-title>
+						</h1>
 					</v-col>
 				</v-row>
 				<v-row 
@@ -300,6 +303,14 @@ const base64ToBlob = (base64, mimeType) => {
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Aladin&display=swap');
+
+.logo {
+	font-family: "Aladin", system-ui;
+	font-weight: 400;
+	font-style: normal;
+}
+
 #app {
 	margin: 0px;
 	padding: 0px;
