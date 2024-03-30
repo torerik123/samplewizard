@@ -57,7 +57,7 @@ const props = defineProps({
 	},
 	progressColor: {
 		type: String,
-		required: true,
+		required: false,
 		default: '#e255a1',
 	},
 })
@@ -72,6 +72,10 @@ onMounted(() => {
 			waveColor: props.waveColor,
 			progressColor: props.progressColor,
 			url: props.src
+		})
+
+		wavesurfer.value.on('finish', () => {
+			isPlaying.value = false
 		})
 	})
 })
