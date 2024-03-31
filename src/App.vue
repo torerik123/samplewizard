@@ -121,7 +121,7 @@
 				>
 					<v-col class="pa-0">
 						<p class="mb-2 text-caption">
-							To dowload files as WAV/MP3 you need a premium account. 
+							To dowload files in WAV format you need a premium account. 
 						</p>
 						<v-btn
 							variant="outlined"
@@ -168,11 +168,11 @@ const audioFormats = ref([
 		value: "WAV",
 		props: { disabled: showLoginMessage }
 	},
-	{
-		title: "MP3",
-		value: "MP3",
-		props: { disabled: true }
-	}
+	// {
+	// 	title: "MP3",
+	// 	value: "MP3",
+	// 	props: { disabled: true }
+	// }
 ])
 const audioSrc = ref(false)
 const isRecording = ref(false)
