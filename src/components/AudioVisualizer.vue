@@ -18,7 +18,7 @@
 	<v-row 
 		dense 
 	>
-		<v-spacer></v-spacer>
+		<v-spacer />
 		<v-col cols="auto">
 			<v-btn
 				:append-icon="isPlaying ? 'mdi-pause' : 'mdi-play'"
