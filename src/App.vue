@@ -20,133 +20,132 @@
 							:color="highlightColor" 
 						/>
 					</v-col>
-					<!-- <v-col cols="auto"> -->
-						
-						<!-- <v-btn 
-							icon="mdi-trash-can"
-							class="ml-3"
-						/> -->
-					<!-- </v-col> -->
 				</v-row>
 
 				<v-row
 					dense
 					no-gutters
 					class="pb-3"
-					v-if="showTabs"
 				>
 					<v-spacer />
 					<v-col>
-						<v-tabs
+						<!-- <v-tabs
+							v-model="activeTab"
 							density="compact"
 							:color="highlightColor"
 							hide-slider
 						>
 							<v-tab 
 								density="compact"
-								value="1"
+								:value="0"
 								text="record"
 								prepend-icon="mdi-music-note"
 							/>
 							<v-tab
 								density="compact"
-								value="2"
+								:value="1"
 								text="Library"
 								prepend-icon="mdi-file-multiple"
 							/>
-						</v-tabs>
+						</v-tabs> -->
 					</v-col>
 					<v-spacer />
 				</v-row>
 		
 				<!-- TODO => Component for recording tab  -->
-				<!-- TODO => Component for library tab -->
-
-				<!-- Record / Playback  -->
-				<v-row 
-					dense
-					no-gutters
-					class="flex-nowrap mb-4"
-				>
-					<v-col v-if="audioSrc">
-						<AudioVisualizer 
-							:src="audioSrc"
-							@delete="deleteAudio"
-						/>
-					</v-col>
-
-					<v-col 
-						v-else
-					>
-						<!-- TODO => Show waveform while recording  -->
-						<RecordButton
-							:button-state="recordBtnState"
-							@set-recording-status="setRecordingStatus"
-						/>
-					</v-col>
-				</v-row>
-
-				<!-- TODO => Seperate to own component  -->
-				<!-- Download  -->
-				<v-row 
-					v-if="audioSrc"
-					dense
-					class="mb-4"
-				>
-					<!-- cols="auto" -->
-					<v-col 
-						class="py-0"
-					>
-						<v-btn
-							style="height: 100%;"
-							text="Download"
-							class="elevation-0"
-							prepend-icon="mdi-download-outline"
-							size="x-large"
-							:color="highlightColor"
-							block
-							:loading="isTranscodingAudio"
-							@click="downloadFile"
-						/>
-					</v-col>
-					
-					<v-col 
-						class="py-0"
-					>
-						<v-select
-							v-model="selectedAudioFormat"
-							:items="audioFormats"
-							item-title="title"
-							item-value="value"
-							hide-details
-							label="Format"
-							variant="solo"
-							flat
-							class="elevation-0"
-							:color="highlightColor"
-						/>
-					</v-col>
-				</v-row>
-
-				<!-- Log in  -->
-				<v-row 
-					v-if="showLoginMessage" 
-					dense 
-				>
-					<v-col class="pa-0">
-						<p class="mb-2 text-caption">
-							To dowload files in WAV format you need a premium account. 
-						</p>
-						<v-btn
-							variant="outlined"
-							:color="highlightColor"
-							block
-							@click="login"
+				<v-window v-model="activeTab">
+					<v-window-item :value="0">
+						<!-- Record / Playback  -->
+						<v-row 
+							dense
+							no-gutters
+							class="flex-nowrap mb-4"
 						>
-							Log in/register
-						</v-btn>
-					</v-col>
-				</v-row>	
+							<v-col v-if="audioSrc">
+								<AudioVisualizer 
+									:src="audioSrc"
+									@delete="deleteAudio"
+								/>
+							</v-col>
+
+							<v-col 
+								v-else
+							>
+								<!-- TODO => Show waveform while recording  -->
+								<RecordButton
+									:button-state="recordBtnState"
+									@set-recording-status="setRecordingStatus"
+								/>
+							</v-col>
+						</v-row>
+
+						<!-- TODO => Seperate to own component  -->
+						<!-- Download  -->
+						<v-row 
+							v-if="audioSrc"
+							dense
+							class="mb-4"
+						>
+							<!-- cols="auto" -->
+							<v-col 
+								class="py-0"
+							>
+								<v-btn
+									style="height: 100%;"
+									text="Download"
+									class="elevation-0"
+									prepend-icon="mdi-download-outline"
+									size="x-large"
+									:color="highlightColor"
+									block
+									:loading="isTranscodingAudio"
+									@click="downloadFile"
+								/>
+							</v-col>
+							
+							<v-col 
+								class="py-0"
+							>
+								<v-select
+									v-model="selectedAudioFormat"
+									:items="audioFormats"
+									item-title="title"
+									item-value="value"
+									hide-details
+									label="Format"
+									variant="solo"
+									flat
+									class="elevation-0"
+									:color="highlightColor"
+								/>
+							</v-col>
+						</v-row>
+
+						<!-- Log in  -->
+						<v-row 
+							v-if="showLoginMessage" 
+							dense 
+						>
+							<v-col class="pa-0">
+								<p class="mb-2 text-caption">
+									To dowload files in WAV format you need a premium account. 
+								</p>
+								<v-btn
+									variant="outlined"
+									:color="highlightColor"
+									block
+									@click="login"
+								>
+									Log in/register
+								</v-btn>
+							</v-col>
+						</v-row>
+					</v-window-item>
+
+					<v-window-item :value="1">
+						<AppLibrary />
+					</v-window-item>
+				</v-window>	
 			</v-sheet>
 		</div>
 	</v-app>
@@ -161,29 +160,16 @@ import audioBufferToWav from "audiobuffer-to-wav"
 // Components
 import AudioVisualizer from './components/AudioVisualizer.vue';
 import AppLogo from './components/AppLogo.vue';
+import AppLibrary from './components/AppLibrary.vue';
 import RecordButton from './components/RecordButton.vue';
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
 const user = ref(false)
+
 const showLoginMessage = computed(() => {
 	return audioSrc.value && !user.value
 })
-
-const showTabs = computed(() => {
-	// return true 
-	// return audioSrc.value && user.value
-})
-
-const recordBtnState = computed(() => {
-	if (isRecording.value) {
-		return "recording-active"
-	} 
-	return "recording-stopped"
-})
-
-
-
 
 // Styles
 const highlightColor = ref("#e255a1")
@@ -210,6 +196,14 @@ const audioSrc = ref(false)
 const isRecording = ref(false)
 const isTranscodingAudio = ref(false)
 const selectedAudioFormat = ref("WEBM")
+const activeTab = ref(null)
+
+const recordBtnState = computed(() => {
+	if (isRecording.value) {
+		return "recording-active"
+	} 
+	return "recording-stopped"
+})
 
 const login = () => {
 	extpay.openPaymentPage()
