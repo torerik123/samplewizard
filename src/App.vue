@@ -20,56 +20,68 @@
 							:color="highlightColor" 
 						/>
 					</v-col>
+					<!-- <v-col cols="auto"> -->
+						
+						<!-- <v-btn 
+							icon="mdi-trash-can"
+							class="ml-3"
+						/> -->
+					<!-- </v-col> -->
 				</v-row>
-				<v-row 
-					dense 
-					no-gutters
-				>	
-					<v-spacer />
-					<v-col cols="auto">
 
-						<!-- TODO => Show waveform while recording  -->
-						<!-- TODO => Seperate to own component => ex AppControls -->
-						<v-btn
-							v-if="!isRecording && !audioSrc"
-							prepend-icon="mdi-radiobox-marked"
-							class="elevation-0"
-							size="x-large"
-							@click="setRecordingStatus('start-recording')"
+				<v-row
+					dense
+					no-gutters
+					class="pb-3"
+					v-if="showTabs"
+				>
+					<v-spacer />
+					<v-col>
+						<v-tabs
+							density="compact"
+							:color="highlightColor"
+							hide-slider
 						>
-							<template #prepend>
-								<v-icon 
-									icon="mdi-radiobox-marked"
-									color="red"
-								/>
-							</template>
-							Record
-						</v-btn>
-						<v-btn
-							v-if="isRecording && !audioSrc"
-							prepend-icon="mdi-stop"
-							class="elevation-0"
-							size="x-large"
-							@click="setRecordingStatus('stop-recording')"
-						>
-							Stop recording
-						</v-btn>
+							<v-tab 
+								density="compact"
+								value="1"
+								text="record"
+								prepend-icon="mdi-music-note"
+							/>
+							<v-tab
+								density="compact"
+								value="2"
+								text="Library"
+								prepend-icon="mdi-file-multiple"
+							/>
+						</v-tabs>
 					</v-col>
 					<v-spacer />
 				</v-row>
 		
+				<!-- TODO => Component for recording tab  -->
+				<!-- TODO => Component for library tab -->
 
-				<!-- Playback  -->
+				<!-- Record / Playback  -->
 				<v-row 
-					v-if="audioSrc"
 					dense
 					no-gutters
 					class="flex-nowrap mb-4"
 				>
-					<v-col>
+					<v-col v-if="audioSrc">
 						<AudioVisualizer 
 							:src="audioSrc"
 							@delete="deleteAudio"
+						/>
+					</v-col>
+
+					<v-col 
+						v-else
+					>
+						<!-- TODO => Show waveform while recording  -->
+						<RecordButton
+							:button-state="recordBtnState"
+							@set-recording-status="setRecordingStatus"
 						/>
 					</v-col>
 				</v-row>
@@ -149,6 +161,7 @@ import audioBufferToWav from "audiobuffer-to-wav"
 // Components
 import AudioVisualizer from './components/AudioVisualizer.vue';
 import AppLogo from './components/AppLogo.vue';
+import RecordButton from './components/RecordButton.vue';
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
@@ -156,6 +169,21 @@ const user = ref(false)
 const showLoginMessage = computed(() => {
 	return audioSrc.value && !user.value
 })
+
+const showTabs = computed(() => {
+	// return true 
+	// return audioSrc.value && user.value
+})
+
+const recordBtnState = computed(() => {
+	if (isRecording.value) {
+		return "recording-active"
+	} 
+	return "recording-stopped"
+})
+
+
+
 
 // Styles
 const highlightColor = ref("#e255a1")
@@ -316,5 +344,9 @@ button:hover,
 button:hover .v-btn__content {
 	border-color: #FFF;
 	color: #FFF;
+}
+
+.v-tab.v-tab.v-btn {
+    min-width: 0px;
 }
 </style>
