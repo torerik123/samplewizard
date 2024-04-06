@@ -15,15 +15,14 @@ describe("Example test", () => {
 		const wrapper = shallowMount(AppLogo, {
 			props: {
 				text: "SampleWizard",
+				color: "#e255a1",
 			},
-			color: "#e255a1"
 		})
-		const logo = wrapper.get('[data-test="appLogo"]')
-		expect(logo.text()).toBe('SampleWizard')
 
-		// TODO - Logo should have correct color
-		console.log(logo.html())
-		// expect(logo.element.style.color).toBe("#e255a1")
+		const logo = wrapper.get('[data-test="appLogo"]')
+
+		expect(logo.text()).toBe('SampleWizard')
+		expect(logo.attributes('style')).toBe('color: #e255a1;')
 	});
 })
 
