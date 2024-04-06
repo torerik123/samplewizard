@@ -2,6 +2,7 @@
 	<h1 
 		class="logo"
 		:style="`color: ${color};`"
+		data-test="appLogo"
 	>
 		{{ text }}
 	</h1>

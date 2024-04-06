@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
 import { crx } from "@crxjs/vite-plugin"
@@ -5,7 +6,12 @@ import manifest from "./manifest.json"
 
 export default defineConfig({
 	test: {
+		environment: "happy-dom",
 		globals: true,
+		coverage: {
+			provider: 'v8'
+		},
+		css: true,
 	},
 	plugins: [vue(), crx({ manifest })],
 	build: {
