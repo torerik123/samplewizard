@@ -5,12 +5,14 @@
 			prepend-icon="mdi-radiobox-marked"
 			class="elevation-0"
 			size="x-large"
+			data-test="recordButton"
 			@click="$emit('setRecordingStatus', 'start-recording')"
 		>
 			<template #prepend>
 				<v-icon 
 					icon="mdi-radiobox-marked"
 					color="red"
+					data-test="recordButtonIcon"
 				/>
 			</template>
 			Start recording
@@ -20,6 +22,7 @@
 			prepend-icon="mdi-stop"
 			class="elevation-0"
 			size="x-large"
+			data-test="recordButton"
 			@click="$emit('setRecordingStatus', 'stop-recording')"
 		>
 			Stop recording

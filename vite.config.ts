@@ -9,9 +9,15 @@ export default defineConfig({
 		environment: "happy-dom",
 		globals: true,
 		coverage: {
-			provider: 'v8'
+			provider: 'v8',
+			reporter: ['text', 'json', 'html'],
 		},
 		css: true,
+		server: {
+			deps: {
+				inline: ['vuetify']
+			}
+		},
 	},
 	plugins: [vue(), crx({ manifest })],
 	build: {
