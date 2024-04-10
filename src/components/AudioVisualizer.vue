@@ -9,7 +9,8 @@
 			>
 				<div 
 					id="waveform" 
-					ref="wavesurfer" 
+					ref="wavesurfer"
+					data-test="waveform" 
 				/>
 			</v-sheet>
 		</v-col>
@@ -25,6 +26,7 @@
 				class="elevation-0"
 				:text="isPlaying ? 'Pause' : 'Play'"
 				color="success"
+				data-test="playButton"
 				@click="togglePlay"
 			/>
 		</v-col>
@@ -32,7 +34,8 @@
 			<v-btn
 				append-icon="mdi-trash-can"
 				class="elevation-0"
-				text="delete"
+				text="Delete"
+				data-test="deleteButton"
 				@click="$emit('delete')"
 			/>
 		</v-col>
@@ -68,7 +71,7 @@ const emits = defineEmits(["delete"])
 onMounted(() => {
 	nextTick(() => {
 		wavesurfer.value = WaveSurfer.create({
-			container: '#waveform',
+			container: wavesurfer.value,
 			height: 80,
 			waveColor: props.waveColor,
 			progressColor: props.progressColor,

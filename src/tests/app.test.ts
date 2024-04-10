@@ -1,5 +1,5 @@
 import { VueWrapper, mount, shallowMount } from "@vue/test-utils";
-import { describe, expect, it, beforeEach, test } from "vitest";
+import { describe, expect, it, beforeEach,  } from "vitest";
 
 // Vuetify
 import { createVuetify } from 'vuetify'
@@ -11,9 +11,12 @@ const vuetify = createVuetify({
   directives,
 })
 
-// import App from "../App.vue";
 import AppLogo from "../components/AppLogo.vue";
 import RecordButton from "../components/RecordButton.vue";
+import AudioVisualizer from "../components/AudioVisualizer.vue";
+
+// Fixtures
+import { webmSrc } from "./fixtures/webmSrc";
 
 describe("Logo", () => {
 	it("Render logo with correct color", () => {
@@ -85,5 +88,40 @@ describe("RecordButton", () => {
 	})
 
 
+})
+
+describe("AudioVisualizer", () => {
+	it("Render component", async () => {
+		const wrapper = mount(AudioVisualizer, {
+			global: {
+				plugins: [vuetify]
+			},
+			props: {
+				src: webmSrc
+			}
+		})
+
+		// Waveform 
+		const waveform = wrapper.get('[data-test="waveform"]')
+		expect(waveform.exists()).toBe(true)
+
+		// Play + Delete button
+		const playBtn = wrapper.get('[data-test="playButton"]')
+		const deleteBtn = wrapper.get('[data-test="deleteButton"]')
+
+		expect(playBtn.exists()).toBe(true)
+		expect(deleteBtn.exists()).toBe(true)
+
+		expect(playBtn.text()).toBe('Play')
+		expect(playBtn.find("i").attributes('class')).toContain('mdi-play')
+
+		expect(deleteBtn.text()).toBe('Delete')
+		expect(deleteBtn.find("i").attributes('class')).toContain('mdi-trash-can')
+
+		// Emits delete event on delete button click
+		await deleteBtn.trigger('click')
+
+		expect(wrapper.emitted()).toEqual({ delete: [ [] ] })	
+	})
 })
 
