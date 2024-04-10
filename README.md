@@ -10,4 +10,5 @@ The extension has a free plan and a premium plan. The option to download files i
 - Vuetify
 - Stripe
 
-[SampleWizard](https://i.imgur.com/sMkRU9s.png)
+
+![SampleWizard](https://i.imgur.com/sMkRU9s.png)
