@@ -152,8 +152,9 @@
 </template>
 
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import type { Ref, } from 'vue'
 import ExtPay from "../ExtPay.js"
 import audioBufferToWav from "audiobuffer-to-wav"
 
@@ -165,17 +166,25 @@ import RecordButton from './components/RecordButton.vue';
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
-const user = ref(false)
+const user: Ref<object | false> = ref(false)
 
-const showLoginMessage = computed(() => {
+const showLoginMessage = computed<Boolean>(() => {
 	return audioSrc.value && !user.value
 })
 
 // Styles
-const highlightColor = ref("#e255a1")
+const highlightColor: Ref<string> = ref("#e255a1")
+
+interface AudioFormatOption {
+	title: string
+	value: string
+	props?: { 
+		disabled?: boolean 
+	}
+}
 
 // Audio
-const audioFormats = ref([
+const audioFormats: Ref<Array<Array<AudioFormatOption>>> = ref([
 	{
 		title: "WEBM",
 		value: "WEBM",
@@ -192,13 +201,13 @@ const audioFormats = ref([
 	// }
 ])
 
-const audioSrc = ref(false)
-const isRecording = ref(false)
-const isTranscodingAudio = ref(false)
-const selectedAudioFormat = ref("WEBM")
-const activeTab = ref(null)
+const audioSrc: Ref<string> = ref("")
+const isRecording: Ref<boolean> = ref(false)
+const isTranscodingAudio: Ref<string | boolean> = ref(false)
+const selectedAudioFormat: Ref<string> = ref("WEBM")
+const activeTab: Ref<null | number> = ref(null)
 
-const recordBtnState = computed(() => {
+const recordBtnState = computed<string>(() => {
 	if (isRecording.value) {
 		return "recording-active"
 	} 
@@ -209,7 +218,7 @@ const login = () => {
 	extpay.openPaymentPage()
 }
 
-onMounted( async () => {
+onMounted( async () : Promise<void> => {
 	const authUser = await extpay.getUser()
 
 	if (authUser?.paid) {	
@@ -223,7 +232,7 @@ onMounted( async () => {
 		audioSrc.value = savedAudio.new_recording
 	}
 
-	chrome.runtime.onMessage.addListener(async(message) => { 
+	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => { 
 		if (message.type === "recording-saved") {
 			// const id = message.data.id
 			// const result = await chrome.storage.local.get(["recording_" + id])
@@ -236,13 +245,13 @@ onMounted( async () => {
 
 	const existingContexts = await chrome.runtime.getContexts({});
 	const offscreenDocument = existingContexts.find(
-		(c) => c.contextType === 'OFFSCREEN_DOCUMENT'
+		(c) : boolean => c.contextType === 'OFFSCREEN_DOCUMENT'
 	)
 
 	isRecording.value = offscreenDocument?.documentUrl?.endsWith('#recording')
 })
 
-const setRecordingStatus = async (status) => {
+const setRecordingStatus = async (status) : Promise<void> => {
 	isRecording.value = status === "start-recording" ? true : false 
 
 	chrome.runtime.sendMessage({
@@ -250,12 +259,12 @@ const setRecordingStatus = async (status) => {
 	})
 }
 
-const deleteAudio = () => {
+const deleteAudio = () : void => {
 	audioSrc.value = null
 	chrome.storage.local.remove(["new_recording"])
 }
 
-const downloadFile = async  () => {
+const downloadFile = async  () : Promise<void> => {
 	try {
 		const file = await transcode(audioSrc.value, selectedAudioFormat.value)
 		chrome.downloads.download({	url: file })
@@ -266,7 +275,7 @@ const downloadFile = async  () => {
 	}
 }
 
-const transcode = async (base64AudioData, outputFormat) => {
+const transcode = async (base64AudioData, outputFormat) : Promise<string> => {
 	isTranscodingAudio.value = true
 
 	if (!outputFormat) {
@@ -315,7 +324,7 @@ const transcode = async (base64AudioData, outputFormat) => {
 	return transcodedAudio
 }
 
-const base64ToBlob = (base64, mimeType) => {
+const base64ToBlob = (base64, mimeType) : Blob => {
     const bytes = atob(base64.split(',')[1]);
     let { length } = bytes;
     const out = new Uint8Array(length);
