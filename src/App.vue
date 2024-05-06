@@ -168,7 +168,7 @@ import RecordButton from './components/RecordButton.vue';
 const extpay = ExtPay('samplewizard')
 const user: Ref<object | false> = ref(false)
 
-const showLoginMessage = computed<Boolean>(() => {
+const showLoginMessage = computed<Boolean>(() : boolean => {
 	return audioSrc.value && !user.value
 })
 
@@ -184,7 +184,7 @@ interface AudioFormatOption {
 }
 
 // Audio
-const audioFormats: Ref<Array<Array<AudioFormatOption>>> = ref([
+const audioFormats: Ref<Array<AudioFormatOption>>= ref([
 	{
 		title: "WEBM",
 		value: "WEBM",
@@ -203,18 +203,18 @@ const audioFormats: Ref<Array<Array<AudioFormatOption>>> = ref([
 
 const audioSrc: Ref<string> = ref("")
 const isRecording: Ref<boolean> = ref(false)
-const isTranscodingAudio: Ref<string | boolean> = ref(false)
+const isTranscodingAudio: Ref<boolean> = ref(false)
 const selectedAudioFormat: Ref<string> = ref("WEBM")
 const activeTab: Ref<null | number> = ref(null)
 
-const recordBtnState = computed<string>(() => {
+const recordBtnState = computed<string>(() : "recording-active" | "recording-stopped" => {
 	if (isRecording.value) {
 		return "recording-active"
 	} 
 	return "recording-stopped"
 })
 
-const login = () => {
+const login = () : void => {
 	extpay.openPaymentPage()
 }
 
@@ -275,7 +275,7 @@ const downloadFile = async  () : Promise<void> => {
 	}
 }
 
-const transcode = async (base64AudioData, outputFormat) : Promise<string> => {
+const transcode = async (base64AudioData: string, outputFormat: string) : Promise<string> => {
 	isTranscodingAudio.value = true
 
 	if (!outputFormat) {
@@ -318,13 +318,15 @@ const transcode = async (base64AudioData, outputFormat) : Promise<string> => {
 		console.log(error)
 		return error
 	} finally {
-		deleteAudio()
+		// TODO => Only delete recording when user clicks "new recording"
+		// deleteAudio()
 	}
-	
+
+	isTranscodingAudio.value = false
 	return transcodedAudio
 }
 
-const base64ToBlob = (base64, mimeType) : Blob => {
+const base64ToBlob = (base64: string, mimeType: string) : Blob => {
     const bytes = atob(base64.split(',')[1]);
     let { length } = bytes;
     const out = new Uint8Array(length);

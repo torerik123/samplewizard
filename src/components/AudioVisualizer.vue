@@ -42,12 +42,13 @@
 	</v-row>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue';
+import type { Ref } from 'vue';
 import WaveSurfer from 'wavesurfer.js'
 
-const wavesurfer = ref(null)
-const isPlaying = ref(false)
+const wavesurfer: Ref<null | object> = ref(null)
+const isPlaying: Ref<boolean> = ref(false)
 
 const props = defineProps({
 	src: {
@@ -66,7 +67,9 @@ const props = defineProps({
 	},
 })
 
-const emits = defineEmits(["delete"])
+const emit = defineEmits<{
+  (e: 'delete'): void
+}>()
 
 onMounted(() => {
 	nextTick(() => {
@@ -84,7 +87,7 @@ onMounted(() => {
 	})
 })
 
-const togglePlay = () => {
+const togglePlay = (): void => {
 	if (isPlaying.value) {
 		wavesurfer.value.pause()
 		isPlaying.value = false

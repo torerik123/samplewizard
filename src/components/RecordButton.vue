@@ -30,8 +30,10 @@
 	</v-sheet>
 </template>
 
-<script setup>
-const emits = defineEmits(["setRecordingStatus"])
+<script setup lang="ts">
+const emits = defineEmits<{
+	(e: "setRecordingStatus"): void
+}>()
 
 const props = defineProps({
 	buttonState: {
