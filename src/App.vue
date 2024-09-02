@@ -29,7 +29,7 @@
 				>
 					<v-spacer />
 					<v-col>
-						<!-- <v-tabs
+						<v-tabs
 							v-model="activeTab"
 							density="compact"
 							:color="highlightColor"
@@ -47,7 +47,7 @@
 								text="Library"
 								prepend-icon="mdi-file-multiple"
 							/>
-						</v-tabs> -->
+						</v-tabs>
 					</v-col>
 					<v-spacer />
 				</v-row>
@@ -142,6 +142,7 @@
 						</v-row>
 					</v-window-item>
 
+					<!-- TODO => Only show if logged in  -->
 					<v-window-item :value="1">
 						<AppLibrary />
 					</v-window-item>

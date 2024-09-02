@@ -1,5 +1,5 @@
 <template>
-	<v-sheet class="bg-transparent">
+	<v-sheet class="bg-transparent elevation-0">
 		<v-btn
 			v-if="buttonState === 'recording-stopped'"
 			prepend-icon="mdi-radiobox-marked"
