@@ -53,7 +53,7 @@
 				</v-row>
 		
 				<!-- TODO => Component for recording tab  -->
-				<v-window v-model="activeTab">
+				<v-window v-model="activeTab" style="padding: 4px;">
 					<v-window-item :value="0">
 						<!-- Record / Playback  -->
 						<v-row 
@@ -122,27 +122,12 @@
 						</v-row>
 
 						<!-- Log in  -->
-						<v-row 
-							v-if="showLoginMessage" 
-							dense 
-						>
-							<v-col class="pa-0">
-								<p class="mb-2 text-caption">
-									To dowload files in WAV format you need a premium account. 
-								</p>
-								<v-btn
-									variant="outlined"
-									:color="highlightColor"
-									block
-									@click="login"
-								>
-									Log in/register
-								</v-btn>
-							</v-col>
-						</v-row>
+						<LoginOrSignupBtn
+							v-if="showLoginMessage"  
+						 	message="To dowload files in WAV format you need a premium account." 
+						/>
 					</v-window-item>
 
-					<!-- TODO => Only show if logged in  -->
 					<v-window-item :value="1">
 						<AppLibrary />
 					</v-window-item>
@@ -164,6 +149,7 @@ import AudioVisualizer from './components/AudioVisualizer.vue';
 import AppLogo from './components/AppLogo.vue';
 import AppLibrary from './components/AppLibrary.vue';
 import RecordButton from './components/RecordButton.vue';
+import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')

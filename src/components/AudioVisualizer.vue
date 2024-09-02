@@ -47,6 +47,8 @@ import { ref, onMounted, nextTick } from 'vue';
 import type { Ref } from 'vue';
 import WaveSurfer from 'wavesurfer.js'
 
+// TODO => Save to library BTN
+
 const wavesurfer: Ref<null | object> = ref(null)
 const isPlaying: Ref<boolean> = ref(false)
 
