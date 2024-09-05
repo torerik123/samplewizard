@@ -9,10 +9,11 @@
     "preview": "vite preview",
     "test": "vitest",
     "test ui": "vitest --ui",
-	"coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "@supabase/supabase-js": "^2.45.3",
     "@vitest/coverage-v8": "^1.4.0",
     "audiobuffer-to-wav": "^1.0.0",
     "resize-observer-polyfill": "^1.5.1",
