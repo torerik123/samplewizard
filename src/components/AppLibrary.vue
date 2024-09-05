@@ -6,7 +6,7 @@
 
 		<v-sheet color="transparent" v-else>
 			<v-row
-				v-for="file, num in savedFiles" 
+				v-for="file, num in userFiles" 
 				:key="file"
 				dense
 				no-gutters
@@ -15,8 +15,8 @@
 				<v-col>
 					<v-card 
 						:key="file"
-						:title="file + '-' + num"
-						subtitle="01/02/2023 | 00:00"
+						:title="file.filename"
+						:subtitle="file.created_at"
 						class="mb-1"
 						elevation="0"
 						density="compact"
@@ -28,7 +28,7 @@
 							<v-row dense no-gutters>
 								<v-col cols="auto">
 									<v-btn 
-										@click="playFile(file)"
+										@click="playFile(file.file_url)"
 										icon="mdi-download" 
 										variant="text"
 										size="small"
@@ -75,7 +75,10 @@ const extpay = ExtPay('samplewizard')
 
 const highlightColor = ref("#e255a1")
 
-const  isLoggedIn = ref<boolean>(false)
+const isLoggedIn = ref<boolean>(false)
+
+// TODO => TS array of Files
+const userFiles = ref([])
 
 //TODO: TS type file
 const savedFiles = ref<string[]>([
@@ -93,30 +96,23 @@ const savedFiles = ref<string[]>([
 ])
 
 const fetchUserFiles = async (userEmail: string) => {
-
 	// TODO
-		// supabase => Get files => pass in email
-		// in supabase check JWT => lookup email => get uuid
-		// get all files matching uuid 
+		// FIX RLS
+		// JWT => EMAIL
 
-	const { data, error } = await supabase
-		.from('files')
-		.select('*')
-		.eq('uploaded_by', "e3cca84f-f0f8-4f99-b690-2c2f6aa29ef7");
-
-
-	// const { data, error } = await supabase
-	// 	.from('files')
-	// 	.select('*')
-	// 	.eq('email', userEmail);
+		const { data, error } = await supabase
+			.from('email')
+			.select(`
+				files ( * )
+			`)
 
 	if (error) {
-		console.error('Error fetching files:', error);
-		return [];
+		console.error('Error fetching files:', error)
+		return []
 	}
 
-	return data;
-};
+	return data[0]?.files.length ? data[0].files : []
+}
 
 
 onMounted( async () : Promise<void> => {
@@ -125,13 +121,10 @@ onMounted( async () : Promise<void> => {
 	if (authUser?.paid) {	
 		isLoggedIn.value = true
 
-		console.log(authUser)
-
-		const files = fetchUserFiles(authUser.email)
+		const files = await fetchUserFiles(authUser.email)
+		userFiles.value = files
 		console.log("files -- ", files)
 	}
-
-	
 })
 
 const playFile = (file) => {
