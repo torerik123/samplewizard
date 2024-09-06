@@ -14,23 +14,23 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "@supabase/supabase-js": "^2.45.3",
-    "@vitest/coverage-v8": "^1.4.0",
+    "@vitest/coverage-v8": "^2.0.5",
     "audiobuffer-to-wav": "^1.0.0",
     "resize-observer-polyfill": "^1.5.1",
-    "vue": "^3.3.11",
-    "vuetify": "^3.4.8",
-    "wavesurfer.js": "^7.7.5",
-    "webextension-polyfill": "^0.10.0"
+    "vue": "^3.5.2",
+    "vuetify": "^3.7.1",
+    "wavesurfer.js": "^7.8.4",
+    "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.21",
-    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "@vitejs/plugin-vue": "^4.5.2",
-    "@vitest/ui": "^1.4.0",
-    "@vue/test-utils": "^2.4.5",
-    "happy-dom": "^14.6.1",
-    "vite": "^5.0.8",
-    "vitest": "^1.4.0"
+    "@vitejs/plugin-vue": "^5.1.3",
+    "@vitest/ui": "^2.0.5",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^15.7.3",
+    "vite": "^5.4.3",
+    "vitest": "^2.0.5"
   }
 }

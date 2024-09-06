@@ -1,32 +1,40 @@
 <template>
 	<div v-if="isLoggedIn">
-		<v-sheet color="transparent" v-if="!savedFiles.length">
+		<v-sheet color="transparent" v-if="!userFiles.length">
 			<v-card text="You have no saved files." />
 		</v-sheet>
 
 		<v-sheet color="transparent" v-else>
 			<v-row
-				v-for="file, num in userFiles" 
-				:key="file"
+				v-for="file in userFiles" 
+				:key="file.filename"
 				dense
 				no-gutters
 				align="center"
+				class="mb-1"
 			>
 				<v-col>
-					<v-card 
-						:key="file"
+					<AudioVisualizer 
+						:src="file.file_url"
+						variant="list"
+						:title="file.filename"
+					/>
+
+					<!-- <v-card 
 						:title="file.filename"
 						:subtitle="file.created_at"
 						class="mb-1"
 						elevation="0"
 						density="compact"
 					>
+						
 						<template #prepend>
 							<v-btn icon="mdi-play" size="small" :color="highlightColor"/>
 						</template>
 						<template #append>
 							<v-row dense no-gutters>
-								<v-col cols="auto">
+
+								<v-col cols="auto">									
 									<v-btn 
 										@click="playFile(file.file_url)"
 										icon="mdi-download" 
@@ -44,7 +52,7 @@
 								</v-col>
 							</v-row>
 						</template>
-					</v-card>
+					</v-card> -->
 				</v-col>
 			</v-row>
 		</v-sheet>
@@ -65,46 +73,77 @@ import LoginOrSignupBtn from "../components/LoginOrSignupBtn.vue"
 import ExtPay from "../../Extpay.js"
 import { createClient } from '@supabase/supabase-js'
 
-// Create a single supabase client for interacting with your database
-const supabase = createClient('https://pysnzshgeafotwtersgp.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5c256c2hnZWFmb3R3dGVyc2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzNjIyMDAsImV4cCI6MjA0MDkzODIwMH0.admFCKfM7V3kdwPbnA_3pONoX9hs_eRvuQubrYOfN0Q')
+// Components
+import AudioVisualizer from '../components/AudioVisualizer.vue';
+
+// Types 
+import { Database } from "../types/supabasetypes"
+import { File, Email } from "../types/global"
+
+const supabase = createClient<Database>(
+	'https://pysnzshgeafotwtersgp.supabase.co', 
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5c256c2hnZWFmb3R3dGVyc2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzNjIyMDAsImV4cCI6MjA0MDkzODIwMH0.admFCKfM7V3kdwPbnA_3pONoX9hs_eRvuQubrYOfN0Q' 
+)
 
 // TODO
 // Supabase types 
+//TODO: TS type file
+
+
+// TODO => Move JWT logic to separate file
+async function getToken(email: string) : Promise<string> {
+	const response = await fetch('https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ email }),
+	});
+
+	if (response.ok) {
+		const { token } = await response.json();
+		console.log('JWT Token:', token);
+		return token;
+	} else {
+		const error = await response.json();
+		throw new Error(error.message);
+	}
+}
+
+// getToken('tor_erik_grimen@hotmail.com')
+// 	.then(token => {
+// 		console.log('JWT Token:', token);
+// 		// Save the token in localStorage or send it in requests
+// 	})
+// 	.catch(error => console.error('Error:', error));
+
+
+// TODO - set token in localstorage
+
 
 const extpay = ExtPay('samplewizard')
-
 const highlightColor = ref("#e255a1")
 
 const isLoggedIn = ref<boolean>(false)
 
 // TODO => TS array of Files
-const userFiles = ref([])
+const userFiles = ref<File[]>([])
 
-//TODO: TS type file
-const savedFiles = ref<string[]>([
-	"file",
-	"file",
-	"file",
-	"file",
-	"file",
-	"file",
-	"file",
-	"file",
-	"file",
-	"file",
-	"file",
-])
 
-const fetchUserFiles = async (userEmail: string) => {
+const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
 	// TODO
-		// FIX RLS
 		// JWT => EMAIL
 
-		const { data, error } = await supabase
-			.from('email')
-			.select(`
-				files ( * )
-			`)
+		// const jwtToken = generateJWT(userEmail)
+		// console.log("generated JWT", jwtToken)
+		// supabase.auth.setAuth(jwtToken)
+
+	const { data, error } = await supabase
+		.from('emails')
+		.select(`
+		files ( * )
+		`)
+		.eq("user_email", userEmail)
 
 	if (error) {
 		console.error('Error fetching files:', error)
@@ -122,12 +161,16 @@ onMounted( async () : Promise<void> => {
 		isLoggedIn.value = true
 
 		const files = await fetchUserFiles(authUser.email)
-		userFiles.value = files
+		
+		if (files && files.length) {
+			userFiles.value = files
+		}
+
 		console.log("files -- ", files)
 	}
 })
 
-const playFile = (file) => {
-	console.log("TODO")
+const playFile = (fileUrl) => {
+	console.log(fileUrl)
 }
 </script>
