@@ -48,7 +48,7 @@
 
 	<!-- Compact/List view  -->
 	 <div v-if="variant === 'list'">
-		<v-row dense>
+		<v-row dense align="center">
 			<v-col cols="auto">
 				<v-btn 
 					@click="togglePlay"
@@ -60,23 +60,20 @@
 				/>
 			</v-col>
 			<v-col>
-				<v-card>
-					<v-card-subtitle>{{ title }}</v-card-subtitle>
-					
-					<v-sheet>
-						<div 
-							id="waveform" 
-							ref="wavesurfer"
-							data-test="waveform" 
-						/>
-					</v-sheet>
-				</v-card>
+				<v-card-subtitle>{{ title }}</v-card-subtitle>
+				<v-sheet>
+					<div 
+						id="waveform" 
+						ref="wavesurfer"
+						data-test="waveform" 
+					/>
+				</v-sheet>
 			</v-col>
 			<v-col cols="auto">
 				<v-row dense no-gutters>
 					<v-col cols="auto">									
 						<v-btn 
-							@click="playFile(file.file_url)"
+							@click="downloadFileUrl(src)"
 							icon="mdi-download" 
 							variant="text"
 							size="small"
@@ -100,6 +97,7 @@
 import { ref, onMounted, nextTick } from 'vue';
 import type { Ref } from 'vue';
 import WaveSurfer from 'wavesurfer.js'
+import { useUtils } from '../composables/useUtils';
 
 
 // TODO 
@@ -128,14 +126,17 @@ const emit = defineEmits<{
 const wavesurfer: Ref<null | object> = ref(null)
 const isPlaying: Ref<boolean> = ref(false)
 
+const { downloadFileUrl } = useUtils()
+
 onMounted(() => {
 	nextTick(() => {
 		wavesurfer.value = WaveSurfer.create({
 			container: wavesurfer.value,
-			height: props.variant === "single-file" ? 80 : 30	,
+			height: props.variant === "single-file" ? 80 : 20	,
 			waveColor: props.waveColor,
 			progressColor: props.progressColor,
-			url: props.src
+			url: props.src,
+			normalize: true,
 		})
 
 		wavesurfer.value.on('finish', () => {
