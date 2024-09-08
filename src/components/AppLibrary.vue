@@ -19,40 +19,6 @@
 						variant="list"
 						:title="file.filename"
 					/>
-
-					<!-- <v-card 
-						:title="file.filename"
-						:subtitle="file.created_at"
-						class="mb-1"
-						elevation="0"
-						density="compact"
-					>
-						
-						<template #prepend>
-							<v-btn icon="mdi-play" size="small" :color="highlightColor"/>
-						</template>
-						<template #append>
-							<v-row dense no-gutters>
-
-								<v-col cols="auto">									
-									<v-btn 
-										@click="playFile(file.file_url)"
-										icon="mdi-download" 
-										variant="text"
-										size="small"
-									></v-btn>
-								</v-col>
-								<v-col cols="auto">
-									<v-btn 
-										icon="mdi-trash-can" 
-										variant="text"
-										size="small"
-										color="grey"
-									></v-btn>
-								</v-col>
-							</v-row>
-						</template>
-					</v-card> -->
 				</v-col>
 			</v-row>
 		</v-sheet>
@@ -64,10 +30,6 @@
 </template>
 
 <script setup lang="ts">
-// TODO 
-// Get user files
-// Loading spinner while getting files
-
 import { ref, type Ref, onMounted } from "vue"
 import LoginOrSignupBtn from "../components/LoginOrSignupBtn.vue"
 import ExtPay from "../../Extpay.js"
@@ -86,8 +48,8 @@ const supabase = createClient<Database>(
 )
 
 // TODO
-// Supabase types 
-//TODO: TS type file
+// Get files from bucket with name UUID
+// Loading spinner while getting files
 
 
 // TODO => Move JWT logic to separate file
@@ -126,9 +88,7 @@ const highlightColor = ref("#e255a1")
 
 const isLoggedIn = ref<boolean>(false)
 
-// TODO => TS array of Files
 const userFiles = ref<File[]>([])
-
 
 const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
 	// TODO

@@ -55,6 +55,20 @@
 				<!-- TODO => Component for recording tab  -->
 				<v-window v-model="activeTab" style="padding: 4px;">
 					<v-window-item :value="0">
+						<!-- Sample Name  -->
+						<v-row dense v-if="audioSrc">
+							<v-col>
+								<v-text-field
+									v-model="sampleName"
+									clearable
+									prepend-inner-icon="mdi-pencil" 
+									variant="solo" 
+									placeholder="Sample name"
+									density="compact"
+								></v-text-field>
+							</v-col>
+						</v-row>
+
 						<!-- Record / Playback  -->
 						<v-row 
 							dense
@@ -84,9 +98,8 @@
 						<v-row 
 							v-if="audioSrc"
 							dense
-							class="mb-4"
+							class="mb-1"
 						>
-							<!-- cols="auto" -->
 							<v-col 
 								class="py-0"
 							>
@@ -99,7 +112,7 @@
 									:color="highlightColor"
 									block
 									:loading="isTranscodingAudio"
-									@click="downloadFile(audioSrc, selectedAudioFormat)"
+									@click="downloadFile(audioSrc, selectedAudioFormat, sampleName)"
 								/>
 							</v-col>
 							
@@ -117,6 +130,19 @@
 									flat
 									class="elevation-0"
 									:color="highlightColor"
+								/>
+							</v-col>
+						</v-row>
+
+						<v-row 
+							v-if="user && audioSrc"
+							dense 
+						>
+							<v-col cols="auto">
+								<v-btn
+									@click="saveToLibrary" 
+									text="Save to library"
+									prepend-icon="mdi-file-multiple"
 								/>
 							</v-col>
 						</v-row>
@@ -142,7 +168,6 @@
 import { ref, onMounted, computed } from 'vue'
 import type { Ref, } from 'vue'
 import ExtPay from "../ExtPay.js"
-import audioBufferToWav from "audiobuffer-to-wav"
 
 // Components
 import AudioVisualizer from './components/AudioVisualizer.vue';
@@ -151,6 +176,7 @@ import AppLibrary from './components/AppLibrary.vue';
 import RecordButton from './components/RecordButton.vue';
 import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
 import { useUtils } from './composables/useUtils.js';
+import { c } from 'vite/dist/node/types.d-aGj9QkWt.js';
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
@@ -190,10 +216,12 @@ const audioFormats: Ref<Array<AudioFormatOption>>= ref([
 ])
 
 const { downloadFile, isTranscodingAudio } = useUtils()
+
 const audioSrc: Ref<string> = ref("")
 const isRecording: Ref<boolean> = ref(false)
 const selectedAudioFormat: Ref<string> = ref("WEBM")
 const activeTab: Ref<null | number> = ref(null)
+const sampleName = ref<string>("")	
 
 const recordBtnState = computed<string>(() : "recording-active" | "recording-stopped" => {
 	if (isRecording.value) {
@@ -222,10 +250,6 @@ onMounted( async () : Promise<void> => {
 
 	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => { 
 		if (message.type === "recording-saved") {
-			// const id = message.data.id
-			// const result = await chrome.storage.local.get(["recording_" + id])
-			// audioSrc.value = result["recording_" + id]	
-			
 			const result = await chrome.storage.local.get(["new_recording"])
 			audioSrc.value = result["new_recording"]	
 		}
@@ -251,6 +275,13 @@ const deleteAudio = () : void => {
 	audioSrc.value = null
 	chrome.storage.local.remove(["new_recording"])
 }	
+
+const saveToLibrary = () => {
+	console.log("TODO")
+	// TODO
+	// Validation => Must have sample name
+	// Upload to bucket corresponding to UUID
+}
 </script>
 
 <style>

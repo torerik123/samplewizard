@@ -20,6 +20,7 @@
 			</v-col>
 		</v-row>
 	
+		<!-- Play / Delete 		 -->
 		<v-row 
 			dense 
 		>
@@ -99,15 +100,10 @@ import type { Ref } from 'vue';
 import WaveSurfer from 'wavesurfer.js'
 import { useUtils } from '../composables/useUtils';
 
-
-// TODO 
-// single-file view => Save to library BTN
-
-
 interface Props {
 	src: string,
-	waveColor?: string, // Default ???
-	progressColor?: string, // Default??
+	waveColor?: string,
+	progressColor?: string,
 	variant?: "single-file" | "list"
 	title?: string,
 }
@@ -118,7 +114,7 @@ const props = withDefaults(defineProps<Props>(), {
 	variant: "single-file",
 })
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'delete'): void
 }>()
 

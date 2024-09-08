@@ -4,12 +4,17 @@ import audioBufferToWav from "audiobuffer-to-wav"
 export const useUtils = () => {
 	const isTranscodingAudio: Ref<boolean> = ref(false)
 
-	const downloadFile = async (audioSrc, audioFormat): Promise<void> => {
+	const downloadFile = async (audioSrc: string, audioFormat: string, sampleName?: string) : Promise<void> => {
 		try {
 			console.log("AUDIOTYPE", typeof audioSrc)
-			const file = await transcode(audioSrc, audioFormat);
-			chrome.downloads.download({ url: file });
-			console.log("File downloaded!");
+			const file = await transcode(audioSrc, audioFormat)
+
+			if (sampleName) {
+				chrome.downloads.download({ url: file, filename: sampleName + `.` + audioFormat })
+			} else {
+				chrome.downloads.download({ url: file })
+			}
+			console.log("File downloaded!")
 		} catch (error) {
 			console.log(error);
 			alert("Something went wrong, please try again later");
@@ -64,9 +69,6 @@ export const useUtils = () => {
 		} catch (error) {
 			console.log(error);
 			return error;
-		} finally {
-			// TODO => Only delete recording when user clicks "new recording"
-			// deleteAudio()
 		}
 	
 		isTranscodingAudio.value = false;
@@ -86,6 +88,7 @@ export const useUtils = () => {
 	}
 
 	const downloadFileUrl = (url: string) => {
+		console.log()
 		// 	const { data, error } = await supabase
 		//   .storage
 		//   .from('avatars')
