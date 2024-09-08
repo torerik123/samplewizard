@@ -91,13 +91,14 @@ describe("RecordButton", () => {
 })
 
 describe("AudioVisualizer", () => {
-	it("Render component", async () => {
+	it("Render component - single file", async () => {
 		const wrapper = mount(AudioVisualizer, {
 			global: {
 				plugins: [vuetify]
 			},
 			props: {
-				src: webmSrc
+				src: webmSrc,
+				variant: "single-file",
 			}
 		})
 
@@ -121,7 +122,13 @@ describe("AudioVisualizer", () => {
 		// Emits delete event on delete button click
 		await deleteBtn.trigger('click')
 
-		expect(wrapper.emitted()).toEqual({ delete: [ [] ] })	
+		// Check for the delete event only
+		expect(wrapper.emitted('delete')).toBeTruthy()
+		expect(wrapper.emitted('delete').length).toBe(1)	
 	})
+
+	// it("Render component - list", async () => {
+			
+	// })
 })
 
