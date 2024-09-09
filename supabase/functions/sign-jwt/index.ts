@@ -1,63 +1,72 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
-
-// Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
-import { serve } from "https://deno.land/x/sift@0.4.3/mod.ts";
-import { create, getNumericDate } from "https://deno.land/x/djwt@v2.7/mod.ts";
+import { create, getNumericDate } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
 
 const SECRET_KEY = Deno.env.get("JWT_SECRET");
 
-serve(async (req: Request) => {
-	if (req.method === "OPTIONS") {
-		return new Response("OK", {
-			headers: {
-				"Access-Control-Allow-Origin": "*", // Allow any origin, or restrict to your domain
-				"Access-Control-Allow-Methods": "POST, OPTIONS",
-				"Access-Control-Allow-Headers": "Content-Type",
-			},
-		});
+export const corsHeaders = {
+	'Access-Control-Allow-Origin': '*',
+	'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+Deno.serve(async (req: Request) => {
+    console.log("REQUEST", req);
+
+	if (!SECRET_KEY) {
+		console.error("JWT_SECRET is not set");
+		return new Response("Internal Server Error", { status: 500 });
 	}
 
-	if (req.method !== "POST") {
-		return new Response("Method not allowed", { status: 405 });
-	}
+    // Handle CORS preflight request
+    if (req.method === "OPTIONS") {
+        return new Response("OK", {
+            headers: {
+				...corsHeaders,
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST, OPTIONS",
+            },
+        });
+    }
 
-	const body = await req.json();
-	const { email } = body;
+    if (req.method !== "POST") {
+        return new Response("Method not allowed", { status: 405 });
+    }
 
-	if (!email) {
-		return new Response("Email is required", { status: 400 });
-	}
+    try {
+        const text = await req.text(); // Read raw text
+        console.log("Raw request body:", text); // Log raw text
+        const body = JSON.parse(text); // Parse text to JSON
+        console.log("Parsed request body:", body); // Log parsed body
 
-	// JWT token payload
-	const payload = {
-		iss: "SampleWizard", // Issuer
-		sub: email, // Subject (user's email)
-		exp: getNumericDate(60 * 60), // Expires in 1 hour
-	};
+        const { email } = body;
 
-	// Sign the JWT token
-	const jwt = await create({ alg: "HS256", typ: "JWT" }, payload, SECRET_KEY);
+        if (!email) {
+            return new Response("Email is required", { status: 400 });
+        }
 
-	return new Response(JSON.stringify({ token: jwt }), {
-		headers: {
-			"Content-Type": "application/json",
-			"Access-Control-Allow-Origin": "*", // Allow any origin, or restrict to your domain
-		},
-	});
+        const payload = {
+            iss: "SampleWizard",
+            sub: email,
+            exp: getNumericDate(60 * 60),
+        };
+
+		
+		// const jwt = await create(
+		// 	{ alg: "HS512", typ: "JWT" }, 
+		// 	payload, 
+		// 	{ key: SECRET_KEY });
+	
+		// TODO => DELETE 
+		const jwt = await create({ alg: "HS512", typ: "JWT" }, { foo: "bar" }, "123");
+
+
+        return new Response(JSON.stringify({ token: jwt }), {
+            headers: {
+				...corsHeaders,
+                "Content-Type": "application/json",
+            },
+        });
+    } catch (error) {
+        console.error("Error processing request:", error);
+        return new Response("Failed to create JWT", { status: 500 });
+    }
 });
-
-/* To invoke locally:
-
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
-
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/sign-jwt' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
-
-*/

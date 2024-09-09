@@ -52,25 +52,25 @@ const supabase = createClient<Database>(
 // Loading spinner while getting files
 
 
-// TODO => Move JWT logic to separate file
-async function getToken(email: string) : Promise<string> {
-	const response = await fetch('https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ email }),
-	});
 
-	if (response.ok) {
-		const { token } = await response.json();
-		console.log('JWT Token:', token);
-		return token;
-	} else {
-		const error = await response.json();
-		throw new Error(error.message);
-	}
-}
+// async function getToken(email: string) : Promise<string> {
+// 	const response = await fetch('https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt', {
+// 		method: 'POST',
+// 		headers: {
+// 			'Content-Type': 'application/json',
+// 		},
+// 		body: JSON.stringify({ email }),
+// 	});
+
+// 	if (response.ok) {
+// 		const { token } = await response.json();
+// 		console.log('JWT Token:', token);
+// 		return token;
+// 	} else {
+// 		const error = await response.json();
+// 		throw new Error(error.message);
+// 	}
+// }
 
 // getToken('tor_erik_grimen@hotmail.com')
 // 	.then(token => {
@@ -114,7 +114,41 @@ const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
 }
 
 
+// TODO => Move JWT logic to separate file
+async function getJwtToken(email) {
+try {
+	const response = await fetch("https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+		},
+		body: JSON.stringify({ email }),
+	});
+
+	if (!response.ok) {
+		throw new Error(`Error: ${response.statusText}`);
+	}
+
+	const data = await response.json();
+	return data.token; // The JWT token
+} catch (error) {
+	console.error("Failed to get JWT token", error);
+	return null;
+}
+}
+
+
+
 onMounted( async () : Promise<void> => {
+
+	// TODO 
+	// Usage
+	const email = "tor_erik_grimen@hotmail.com";
+	getJwtToken(email).then(token => {
+		console.log("Received JWT Token:", token);
+	});
+
 	const authUser = await extpay.getUser()
 
 	if (authUser?.paid) {	

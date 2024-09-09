@@ -55,13 +55,13 @@
 					@click="togglePlay"
 					:icon="isPlaying ? 'mdi-pause' : 'mdi-play'"
 					class="elevation-0"
-					data-test="playButton"
+					data-test="playButtonList"
 					size="small" 
 					:color="progressColor"
 				/>
 			</v-col>
 			<v-col>
-				<v-card-subtitle>{{ title }}</v-card-subtitle>
+				<v-card-subtitle data-test="sampleTitle">{{ title }}</v-card-subtitle>
 				<v-sheet>
 					<div 
 						id="waveform" 

@@ -90,8 +90,8 @@ describe("RecordButton", () => {
 
 })
 
-describe("AudioVisualizer", () => {
-	it("Render component - single file", async () => {
+describe("AudioVisualizer - single file view", () => {
+	it("Render component", async () => {
 		const wrapper = mount(AudioVisualizer, {
 			global: {
 				plugins: [vuetify]
@@ -126,9 +126,38 @@ describe("AudioVisualizer", () => {
 		expect(wrapper.emitted('delete')).toBeTruthy()
 		expect(wrapper.emitted('delete').length).toBe(1)	
 	})
+})
 
-	// it("Render component - list", async () => {
-			
-	// })
+describe('AudioVisualizer - List View', () => {
+	it('renders correctly in list view', async () => {
+		const wrapper = mount(AudioVisualizer, {
+			global: {
+				plugins: [vuetify]
+			},
+			props: {
+				variant: 'list',
+				src: webmSrc,
+				progressColor: 'blue',
+				title: 'Sample Audio'
+			}
+		})
+
+		// Check for play button
+		const playBtn = wrapper.get('[data-test="playButtonList"]')
+		expect(playBtn.exists()).toBe(true)
+
+		// Check the icon inside the play button
+		const icon = playBtn.find('i')
+		expect(icon.exists()).toBe(true)
+		expect(icon.classes()).toContain('mdi-play')
+
+		// Check for title
+		const title = wrapper.find('[data-test="sampleTitle"]')
+		expect(title.text()).toBe('Sample Audio')
+		
+		// Check for waveform element
+		const waveform = wrapper.get('[data-test="waveform"]')
+		expect(waveform.exists()).toBe(true)
+	})
 })
 
