@@ -182,7 +182,7 @@ import { c } from 'vite/dist/node/types.d-aGj9QkWt.js';
 const extpay = ExtPay('samplewizard')
 const user: Ref<object | false> = ref(false)
 
-const showLoginMessage = computed<Boolean>(() : boolean => {
+const showLoginMessage = computed<boolean>(() : boolean => {
 	return audioSrc.value && !user.value
 })
 
