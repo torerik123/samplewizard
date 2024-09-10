@@ -96,12 +96,36 @@ export const useUtils = () => {
 		console.log("TODO")
 	}
 
+	const getJwtToken = async (email: string) => {
+		try {
+			const response = await fetch("https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+				},
+				body: JSON.stringify({ email }),
+			});
+	
+			if (!response.ok) {
+				throw new Error(`Error: ${response.statusText}`);
+			}
+	
+			const data = await response.json();
+			return data.token; // The JWT token
+		} catch (error) {
+			console.error("Failed to get JWT token", error);
+			return null;
+		}
+	}
+
 	return { 
 		isTranscodingAudio,
 		downloadFile,
 		transcode,
 		base64ToBlob,
-		downloadFileUrl,	
+		downloadFileUrl,
+		getJwtToken,
 	}
 }
 

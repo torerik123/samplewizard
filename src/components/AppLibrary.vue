@@ -41,6 +41,7 @@ import AudioVisualizer from '../components/AudioVisualizer.vue';
 // Types 
 import { Database } from "../types/supabasetypes"
 import { File, Email } from "../types/global"
+import { useUtils } from "../composables/useUtils";
 
 const supabase = createClient<Database>(
 	'https://pysnzshgeafotwtersgp.supabase.co', 
@@ -48,40 +49,10 @@ const supabase = createClient<Database>(
 )
 
 // TODO
+// Save file to bucket with folder name uuid 
+
 // Get files from bucket with name UUID
 // Loading spinner while getting files
-
-
-
-// async function getToken(email: string) : Promise<string> {
-// 	const response = await fetch('https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt', {
-// 		method: 'POST',
-// 		headers: {
-// 			'Content-Type': 'application/json',
-// 		},
-// 		body: JSON.stringify({ email }),
-// 	});
-
-// 	if (response.ok) {
-// 		const { token } = await response.json();
-// 		console.log('JWT Token:', token);
-// 		return token;
-// 	} else {
-// 		const error = await response.json();
-// 		throw new Error(error.message);
-// 	}
-// }
-
-// getToken('tor_erik_grimen@hotmail.com')
-// 	.then(token => {
-// 		console.log('JWT Token:', token);
-// 		// Save the token in localStorage or send it in requests
-// 	})
-// 	.catch(error => console.error('Error:', error));
-
-
-// TODO - set token in localstorage
-
 
 const extpay = ExtPay('samplewizard')
 const highlightColor = ref("#e255a1")
@@ -91,6 +62,7 @@ const isLoggedIn = ref<boolean>(false)
 const userFiles = ref<File[]>([])
 
 const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
+	return []
 	// TODO
 		// JWT => EMAIL
 
@@ -115,52 +87,22 @@ const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
 
 
 // TODO => Move JWT logic to separate file
-async function getJwtToken(email) {
-try {
-	const response = await fetch("https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-		},
-		body: JSON.stringify({ email }),
-	});
-
-	if (!response.ok) {
-		throw new Error(`Error: ${response.statusText}`);
-	}
-
-	const data = await response.json();
-	return data.token; // The JWT token
-} catch (error) {
-	console.error("Failed to get JWT token", error);
-	return null;
-}
-}
-
 
 
 onMounted( async () : Promise<void> => {
-
-	// TODO 
-	// Usage
-	const email = "tor_erik_grimen@hotmail.com";
-	getJwtToken(email).then(token => {
-		console.log("Received JWT Token:", token);
-	});
-
 	const authUser = await extpay.getUser()
 
 	if (authUser?.paid) {	
 		isLoggedIn.value = true
 
+		// TODO => token
 		const files = await fetchUserFiles(authUser.email)
 		
 		if (files && files.length) {
 			userFiles.value = files
 		}
 
-		console.log("files -- ", files)
+		// console.log("files -- ", files)
 	}
 })
 

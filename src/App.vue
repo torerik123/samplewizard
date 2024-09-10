@@ -239,28 +239,10 @@ onMounted( async () : Promise<void> => {
 
 	if (authUser?.paid) {	
 		user.value = authUser
-	}
-	 
-	// Check for saved recordings 
-	const savedAudio = await chrome.storage.local.get(["new_recording"])
-	
-	if (savedAudio.new_recording) {
-		audioSrc.value = savedAudio.new_recording
+		refreshToken(authUser.email)
 	}
 
-	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => { 
-		if (message.type === "recording-saved") {
-			const result = await chrome.storage.local.get(["new_recording"])
-			audioSrc.value = result["new_recording"]	
-		}
-	})
-
-	const existingContexts = await chrome.runtime.getContexts({});
-	const offscreenDocument = existingContexts.find(
-		(c) : boolean => c.contextType === 'OFFSCREEN_DOCUMENT'
-	)
-
-	isRecording.value = offscreenDocument?.documentUrl?.endsWith('#recording')
+	getSavedRecordings()
 })
 
 const setRecordingStatus = async (status) : Promise<void> => {
@@ -281,6 +263,44 @@ const saveToLibrary = () => {
 	// TODO
 	// Validation => Must have sample name
 	// Upload to bucket corresponding to UUID
+}
+
+const getSavedRecordings = async () => {
+	// Check for saved recordings on launch
+	const savedAudio = await chrome.storage.local.get(["new_recording"])
+	
+	if (savedAudio.new_recording) {
+		audioSrc.value = savedAudio.new_recording
+	}
+
+	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => { 
+		if (message.type === "recording-saved") {
+			const result = await chrome.storage.local.get(["new_recording"])
+			audioSrc.value = result["new_recording"]	
+		}
+	})
+
+	const existingContexts = await chrome.runtime.getContexts({});
+	const offscreenDocument = existingContexts.find(
+		(c) : boolean => c.contextType === 'OFFSCREEN_DOCUMENT'
+	)
+
+	isRecording.value = offscreenDocument?.documentUrl?.endsWith('#recording')
+}
+
+const refreshToken = async (email: string) => {
+	let { samplewizard_jwt } = await chrome.storage.local.get(["samplewizard_jwt"])
+
+	if (!samplewizard_jwt) {
+		const { getJwtToken } = useUtils()
+		const newToken = await getJwtToken(email)
+
+		await chrome.storage.local.set({ "samplewizard_jwt": newToken })
+		console.log("New token: ", newToken)
+		samplewizard_jwt =  newToken
+	}
+
+	console.log("Received JWT Token:", samplewizard_jwt);
 }
 </script>
 
