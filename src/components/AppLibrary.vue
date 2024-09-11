@@ -7,7 +7,7 @@
 		<v-sheet color="transparent" v-else>
 			<v-row
 				v-for="file in userFiles" 
-				:key="file.filename"
+				:key="file.name"
 				dense
 				no-gutters
 				align="center"
@@ -17,7 +17,7 @@
 					<AudioVisualizer 
 						:src="file.file_url"
 						variant="list"
-						:title="file.filename"
+						:title="file.name"
 					/>
 				</v-col>
 			</v-row>
@@ -42,6 +42,7 @@ import { useUtils } from "../composables/useUtils";
 // TODO
 // Get files from bucket with name UUID
 // Loading spinner while getting files
+// Get storage bucket types
 
 const extpay = ExtPay('samplewizard')
 const highlightColor = ref("#e255a1")
@@ -53,20 +54,35 @@ const jwt = ref()
 const { refreshToken, getUserId } = useUtils()
 
 const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
+// TODO
+	// Fix Array return type
+	// Move to useUtils 
+	// JWT => EMAIL
+
+	let files = []
 	// Get UUID
-	const user_id = getUserId(userEmail)
+	const user_id = await getUserId(userEmail)
 	console.log("LIBRARY", user_id)
 
-	return []
-	// TODO
-		// Move to useUtils 
-		// JWT => EMAIL
+	const { data, error } = await supabase
+		.storage
+		.from('uploaded_files')
+		.list(user_id, {
+			limit: 100,
+			offset: 0,
+			sortBy: { column: 'name', order: 'asc' },
+		})
 
-	// return data[0]?.files.length ? data[0].files : []
+	if (error) {
+		console.error("Error fetching files", error)
+	}
+
+	if (data.length) {
+		// Workaround for placeholder bug - https://github.com/supabase/supabase/issues/9155
+		files = data.filter(file => file.name != ".emptyFolderPlaceholder" ? file : false)
+	}
+	return files
 }
-
-
-// TODO => Move JWT logic to separate file
 
 
 onMounted( async () : Promise<void> => {
@@ -74,16 +90,13 @@ onMounted( async () : Promise<void> => {
 
 	if (authUser?.paid) {	
 		isLoggedIn.value = true
-		jwt.value = await refreshToken(authUser.email)
 
-		// TODO => token
+		jwt.value = await refreshToken(authUser.email)
 		const files = await fetchUserFiles(authUser.email)
 		
 		if (files && files.length) {
 			userFiles.value = files
 		}
-
-		// console.log("files -- ", files)
 	}
 })
 
