@@ -20,14 +20,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type Ref } from "vue"
 import ExtPay from "../../Extpay.js"
+import { useUtils } from "../composables/useUtils.js";
 
 const props = defineProps<{
 	message?: string
 }>()
 
-const highlightColor: Ref<string> = ref("#e255a1")
+const { highlightColor } = useUtils()
 
 const extpay = ExtPay('samplewizard')
 

@@ -15,7 +15,7 @@
 			>
 				<v-col>
 					<AudioVisualizer 
-						:src="file.file_url"
+						:src="file.url"
 						variant="list"
 						:title="file.name"
 					/>
@@ -40,18 +40,21 @@ import AudioVisualizer from '../components/AudioVisualizer.vue';
 import { useUtils } from "../composables/useUtils";
 
 // TODO
-// Get files from bucket with name UUID
+// Download 
+// Delete
+// JWT AUTH
 // Loading spinner while getting files
 // Get storage bucket types
 
 const extpay = ExtPay('samplewizard')
-const highlightColor = ref("#e255a1")
-
 const isLoggedIn = ref<boolean>(false)
 
 const userFiles = ref<File[]>([])
 const jwt = ref()
-const { refreshToken, getUserId } = useUtils()
+const {
+	refreshToken, 
+	getUserId 
+} = useUtils()
 
 const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
 // TODO
@@ -62,7 +65,6 @@ const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
 	let files = []
 	// Get UUID
 	const user_id = await getUserId(userEmail)
-	console.log("LIBRARY", user_id)
 
 	const { data, error } = await supabase
 		.storage
@@ -80,6 +82,28 @@ const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
 	if (data.length) {
 		// Workaround for placeholder bug - https://github.com/supabase/supabase/issues/9155
 		files = data.filter(file => file.name != ".emptyFolderPlaceholder" ? file : false)
+
+		// Create urls
+		const filenames = files.map(file =>  `${user_id}/${file.name}`)
+
+		const { data: signedUrls, error } = await supabase
+			.storage
+			.from('uploaded_files')
+			.createSignedUrls(filenames, 60)
+
+			if (error) {
+				console.warn("Could not get URLs")
+				return
+			}
+
+			if (signedUrls.length) {
+				signedUrls.map((el, index) => {
+					files[index] = {
+						...files[index],
+						url: el.signedUrl
+					}
+				})
+			}
 	}
 	return files
 }
@@ -99,8 +123,4 @@ onMounted( async () : Promise<void> => {
 		}
 	}
 })
-
-const playFile = (fileUrl) => {
-	console.log(fileUrl)
-}
 </script>

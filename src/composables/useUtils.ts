@@ -4,9 +4,10 @@ import { supabase } from "../supabase"
 
 export const useUtils = () => {
 	const isTranscodingAudio: Ref<boolean> = ref(false)
+	const highlightColor: Ref<string> = ref("#e255a1")
 
-	const getUserId = async (email: string): string => {
-		// Get UUID => TODO => Get from state
+	const getUserId = async (email: string): Promise<string> => {
+		// Get UUID
 		let {
 			data: { user_id },
 			error,
@@ -152,7 +153,7 @@ export const useUtils = () => {
 			}
 	
 			const data = await response.json();
-			return data.token; // The JWT token
+			return data.token;
 		} catch (error) {
 			console.error("Failed to get JWT token", error);
 			return null;
@@ -160,7 +161,7 @@ export const useUtils = () => {
 	}
 
 	const refreshToken = async (email: string) => {
-		// Check for existing token => get new token 
+		// Check for existing token => if not => get new token 
 
 		// TODO => Check if token is valid 
 		let { samplewizard_jwt } = await chrome.storage.local.get(["samplewizard_jwt"])
@@ -179,6 +180,7 @@ export const useUtils = () => {
 	}
 
 	return { 
+		highlightColor,
 		isTranscodingAudio,
 		downloadFile,
 		transcode,

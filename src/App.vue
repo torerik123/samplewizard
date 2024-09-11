@@ -190,6 +190,7 @@ import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
 // TODO 
 // Set headers when uploading files
 // Loading spinner while uploading file to library 
+// Save filename to files table, enable tags?
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
@@ -210,7 +211,7 @@ const showLoginMessage = computed<boolean>(() : boolean => {
 })
 
 // Styles
-const highlightColor: Ref<string> = ref("#e255a1") // TODO => Make available in other components
+
 
 interface AudioFormatOption {
 	title: string
@@ -239,6 +240,7 @@ const audioFormats: Ref<Array<AudioFormatOption>>= ref([
 ])
 
 const { 
+	highlightColor,
 	refreshToken, 
 	downloadFile, 
 	isTranscodingAudio, 
