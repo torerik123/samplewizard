@@ -176,7 +176,6 @@ import { ref, onMounted, computed } from 'vue'
 import type { Ref, } from 'vue'
 import ExtPay from "../ExtPay.js"
 import { useUtils } from './composables/useUtils.js';
-import { supabase } from "./supabase";
 
 // Components
 import AudioVisualizer from './components/AudioVisualizer.vue';
@@ -240,10 +239,11 @@ const audioFormats: Ref<Array<AudioFormatOption>>= ref([
 ])
 
 const { 
-	getJwtToken, 
+	refreshToken, 
 	downloadFile, 
 	isTranscodingAudio, 
 	uploadFile, 
+	getUserId,
 } = useUtils()
 
 const audioSrc: Ref<string> = ref("")
@@ -305,21 +305,7 @@ const saveToLibrary = async () => {
 		// const session = { access_token: authHeader }
 		// supabase.auth.setSession(session)
 
-		// Get UUID
-		let { data: { user_id }, error } = await supabase
-			.from('emails')
-			.select('user_id')
-			.eq('user_email', user.value.email)
-			.single()
-			
-
-		if (error) { console.log(error) }
-
-		if (!user_id) {
-			console.warn("User not found.")
-			return 
-		}
-
+		const user_id = await getUserId(user.value.email)
 		uploadFile(audioSrc.value, user_id, sampleName.value)
 	}
 	
@@ -346,23 +332,6 @@ const getSavedRecordings = async () => {
 	)
 
 	isRecording.value = offscreenDocument?.documentUrl?.endsWith('#recording')
-}
-
-const refreshToken = async (email: string) => {
-	// TODO => Check if token is valid 
-	let { samplewizard_jwt } = await chrome.storage.local.get(["samplewizard_jwt"])
-
-	if (!samplewizard_jwt) {
-		const newToken = await getJwtToken(email)
-
-		await chrome.storage.local.set({ "samplewizard_jwt": newToken })
-		console.log("New token: ", newToken)
-		samplewizard_jwt =  newToken
-	}
-
-	console.log("Received JWT Token:", samplewizard_jwt)
-
-	return samplewizard_jwt
 }
 
 const login = () : void => {

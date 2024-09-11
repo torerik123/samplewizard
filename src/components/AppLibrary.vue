@@ -37,12 +37,9 @@ import { supabase } from "../supabase";
 
 // Components
 import AudioVisualizer from '../components/AudioVisualizer.vue';
-
-
+import { useUtils } from "../composables/useUtils";
 
 // TODO
-// Save file to bucket with folder name uuid 
-
 // Get files from bucket with name UUID
 // Loading spinner while getting files
 
@@ -52,29 +49,20 @@ const highlightColor = ref("#e255a1")
 const isLoggedIn = ref<boolean>(false)
 
 const userFiles = ref<File[]>([])
+const jwt = ref()
+const { refreshToken, getUserId } = useUtils()
 
 const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
+	// Get UUID
+	const user_id = getUserId(userEmail)
+	console.log("LIBRARY", user_id)
+
 	return []
 	// TODO
+		// Move to useUtils 
 		// JWT => EMAIL
 
-		// const jwtToken = generateJWT(userEmail)
-		// console.log("generated JWT", jwtToken)
-		// supabase.auth.setAuth(jwtToken)
-
-	const { data, error } = await supabase
-		.from('emails')
-		.select(`
-		files ( * )
-		`)
-		.eq("user_email", userEmail)
-
-	if (error) {
-		console.error('Error fetching files:', error)
-		return []
-	}
-
-	return data[0]?.files.length ? data[0].files : []
+	// return data[0]?.files.length ? data[0].files : []
 }
 
 
@@ -86,6 +74,7 @@ onMounted( async () : Promise<void> => {
 
 	if (authUser?.paid) {	
 		isLoggedIn.value = true
+		jwt.value = await refreshToken(authUser.email)
 
 		// TODO => token
 		const files = await fetchUserFiles(authUser.email)
