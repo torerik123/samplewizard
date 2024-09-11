@@ -33,20 +33,12 @@
 import { ref, type Ref, onMounted } from "vue"
 import LoginOrSignupBtn from "../components/LoginOrSignupBtn.vue"
 import ExtPay from "../../Extpay.js"
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from "../supabase";
 
 // Components
 import AudioVisualizer from '../components/AudioVisualizer.vue';
 
-// Types 
-import { Database } from "../types/supabasetypes"
-import { File, Email } from "../types/global"
-import { useUtils } from "../composables/useUtils";
 
-const supabase = createClient<Database>(
-	'https://pysnzshgeafotwtersgp.supabase.co', 
-	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5c256c2hnZWFmb3R3dGVyc2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzNjIyMDAsImV4cCI6MjA0MDkzODIwMH0.admFCKfM7V3kdwPbnA_3pONoX9hs_eRvuQubrYOfN0Q' 
-)
 
 // TODO
 // Save file to bucket with folder name uuid 

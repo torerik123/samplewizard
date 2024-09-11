@@ -58,14 +58,21 @@
 						<!-- Sample Name  -->
 						<v-row dense v-if="audioSrc">
 							<v-col>
-								<v-text-field
-									v-model="sampleName"
-									clearable
-									prepend-inner-icon="mdi-pencil" 
-									variant="solo" 
-									placeholder="Sample name"
-									density="compact"
-								></v-text-field>
+								<v-form
+									ref="form" 
+									validate-on="lazy"
+								>
+									<v-text-field
+										v-model="sampleName"
+										:rules="nameRules"
+										clearable
+										prepend-inner-icon="mdi-pencil" 
+										variant="solo" 
+										placeholder="Sample name"
+										density="compact"
+									></v-text-field>
+
+								</v-form>
 							</v-col>
 						</v-row>
 
@@ -168,6 +175,8 @@
 import { ref, onMounted, computed } from 'vue'
 import type { Ref, } from 'vue'
 import ExtPay from "../ExtPay.js"
+import { useUtils } from './composables/useUtils.js';
+import { supabase } from "./supabase";
 
 // Components
 import AudioVisualizer from './components/AudioVisualizer.vue';
@@ -175,12 +184,27 @@ import AppLogo from './components/AppLogo.vue';
 import AppLibrary from './components/AppLibrary.vue';
 import RecordButton from './components/RecordButton.vue';
 import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
-import { useUtils } from './composables/useUtils.js';
-import { c } from 'vite/dist/node/types.d-aGj9QkWt.js';
+
+// Types 
+// import { File, Email } from "./types/global"
+
+// TODO 
+// Set headers when uploading files
+// Loading spinner while uploading file to library 
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
-const user: Ref<object | false> = ref(false)
+const jwt = ref()
+
+interface ExtPayUser {
+	email: string
+	installedAt: Date
+	paid: boolean
+	paidAt: Date | null
+	trialStartedAt: Date | null
+}
+
+const user: Ref<ExtPayUser | false> = ref(false)
 
 const showLoginMessage = computed<boolean>(() : boolean => {
 	return audioSrc.value && !user.value
@@ -215,7 +239,12 @@ const audioFormats: Ref<Array<AudioFormatOption>>= ref([
 	// }
 ])
 
-const { downloadFile, isTranscodingAudio } = useUtils()
+const { 
+	getJwtToken, 
+	downloadFile, 
+	isTranscodingAudio, 
+	uploadFile, 
+} = useUtils()
 
 const audioSrc: Ref<string> = ref("")
 const isRecording: Ref<boolean> = ref(false)
@@ -230,16 +259,18 @@ const recordBtnState = computed<string>(() : "recording-active" | "recording-sto
 	return "recording-stopped"
 })
 
-const login = () : void => {
-	extpay.openPaymentPage()
-}
+// Form 
+const form = ref()
+const nameRules = ref([
+	v => !!v || 'Name is required',
+])
 
 onMounted( async () : Promise<void> => {
 	const authUser = await extpay.getUser()
 
-	if (authUser?.paid) {	
+	if (authUser?.paid) {
 		user.value = authUser
-		refreshToken(authUser.email)
+		jwt.value = await refreshToken(authUser.email)
 	}
 
 	getSavedRecordings()
@@ -258,11 +289,40 @@ const deleteAudio = () : void => {
 	chrome.storage.local.remove(["new_recording"])
 }	
 
-const saveToLibrary = () => {
-	console.log("TODO")
-	// TODO
-	// Validation => Must have sample name
-	// Upload to bucket corresponding to UUID
+const saveToLibrary = async () => {
+	const { valid } = await form.value.validate()
+	console.log("saving - " + sampleName.value)
+
+	if (valid && 
+		user.value && 
+		typeof user.value.email === 'string' && 
+		audioSrc.value
+	) {
+		const authHeader = `Bearer ${jwt.value}`
+		console.log("GETTING authHeader", authHeader)
+
+		// TODO => Set JWT when making request
+		// const session = { access_token: authHeader }
+		// supabase.auth.setSession(session)
+
+		// Get UUID
+		let { data: { user_id }, error } = await supabase
+			.from('emails')
+			.select('user_id')
+			.eq('user_email', user.value.email)
+			.single()
+			
+
+		if (error) { console.log(error) }
+
+		if (!user_id) {
+			console.warn("User not found.")
+			return 
+		}
+
+		uploadFile(audioSrc.value, user_id, sampleName.value)
+	}
+	
 }
 
 const getSavedRecordings = async () => {
@@ -289,10 +349,10 @@ const getSavedRecordings = async () => {
 }
 
 const refreshToken = async (email: string) => {
+	// TODO => Check if token is valid 
 	let { samplewizard_jwt } = await chrome.storage.local.get(["samplewizard_jwt"])
 
 	if (!samplewizard_jwt) {
-		const { getJwtToken } = useUtils()
 		const newToken = await getJwtToken(email)
 
 		await chrome.storage.local.set({ "samplewizard_jwt": newToken })
@@ -300,7 +360,13 @@ const refreshToken = async (email: string) => {
 		samplewizard_jwt =  newToken
 	}
 
-	console.log("Received JWT Token:", samplewizard_jwt);
+	console.log("Received JWT Token:", samplewizard_jwt)
+
+	return samplewizard_jwt
+}
+
+const login = () : void => {
+	extpay.openPaymentPage()
 }
 </script>
 

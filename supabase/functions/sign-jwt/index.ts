@@ -39,7 +39,7 @@ Deno.serve(async (req: Request) => {
 		}
 
 		const payload = {
-			user_email: email,
+			email: email,
 		};
 
 		// Create the token

@@ -1,5 +1,6 @@
-import { ref, type Ref } from "vue";
+import { ref, type Ref } from "vue"
 import audioBufferToWav from "audiobuffer-to-wav"
+import { supabase } from "../supabase"
 
 export const useUtils = () => {
 	const isTranscodingAudio: Ref<boolean> = ref(false)
@@ -20,6 +21,30 @@ export const useUtils = () => {
 			alert("Something went wrong, please try again later");
 		}
 	};
+
+	const uploadFile = async (blobUrl: string, uuid: string, sampleName: string) => {
+		// Upload file to storage
+		const filename = `${sampleName}.wav`
+		const response = await fetch(blobUrl)
+		const blob = await response.blob()
+		const file = new File([blob], `${filename}`, { type: "audio/wav" });
+		const pathName = `${uuid}/${filename}`
+	
+		const { data, error: uploadError } = await supabase.storage
+			.from('uploaded_files')
+			.upload(pathName, file, {
+				cacheControl: '3600',
+				contentType: 'audio/wav',
+				upsert: false // Set to true if you want to overwrite existing files
+			})
+	
+		if (uploadError) {
+			console.log('Error uploading file:', uploadError.message)
+			return
+		}
+	
+		console.log('File uploaded successfully:', data)
+	}
 
 	const transcode = async (
 		base64AudioData: string,
@@ -87,15 +112,6 @@ export const useUtils = () => {
 		return new Blob([out], { type: mimeType });
 	}
 
-	const downloadFileUrl = (url: string) => {
-		console.log()
-		// 	const { data, error } = await supabase
-		//   .storage
-		//   .from('avatars')
-		//   .download('folder/avatar1.png')
-		console.log("TODO")
-	}
-
 	const getJwtToken = async (email: string) => {
 		try {
 			const response = await fetch("https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt", {
@@ -124,8 +140,8 @@ export const useUtils = () => {
 		downloadFile,
 		transcode,
 		base64ToBlob,
-		downloadFileUrl,
 		getJwtToken,
+		uploadFile,
 	}
 }
 
