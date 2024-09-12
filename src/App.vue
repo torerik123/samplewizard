@@ -2,7 +2,7 @@
 	<v-app>
 		<div
 			style="height: 100%;"
-			class="bg-black d-flex align-center"
+			class="bg-black d-flex align-start"
 		>
 			<v-sheet
 				width="400"
