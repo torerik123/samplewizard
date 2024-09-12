@@ -19,6 +19,7 @@
 						variant="list"
 						:title="file.name"
 						@delete="deleteFromLibrary(file.name)"
+						@download="downloadLibraryFile(file)"
 					/>
 				</v-col>
 			</v-row>
@@ -115,6 +116,13 @@ const deleteFromLibrary = async (filename: string) => {
 	deleteFile(filename, user.value.id)
 
 	userFiles.value = userFiles.value.filter(item => item.name !== filename)
+}
+
+const downloadLibraryFile = async (file) => {
+	chrome.downloads.download({
+		url: file.url,
+		filename: file.name,
+	})
 }
 
 onMounted( async () : Promise<void> => {

@@ -3,6 +3,8 @@ import audioBufferToWav from "audiobuffer-to-wav"
 import { supabase } from "../supabase"
 
 export const useUtils = () => {
+	// TODO => Split into file, user/auth logic
+
 	const isTranscodingAudio: Ref<boolean> = ref(false)
 	const highlightColor: Ref<string> = ref("#e255a1")
 
