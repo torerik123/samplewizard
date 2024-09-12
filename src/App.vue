@@ -95,7 +95,7 @@
 								<!-- TODO => Show waveform while recording  -->
 								<RecordButton
 									:button-state="recordBtnState"
-									@set-recording-status="setRecordingStatus"
+									@toggle-recording-status="toggleRecordingStatus"
 								/>
 							</v-col>
 						</v-row>
@@ -209,7 +209,7 @@ import { type ExtPayUser } from './types/global.js';
 const extpay = ExtPay('samplewizard')
 const jwt = ref()
 
-const user: Ref<ExtPayUser | false> = ref(false)
+const user: Ref<ExtPayUser> = ref()
 
 const showLoginMessage = computed<boolean>(() : boolean => {
 	return audioSrc.value && !user.value
@@ -253,8 +253,8 @@ const {
 
 const audioSrc: Ref<string> = ref("")
 const isRecording: Ref<boolean> = ref(false)
-const selectedAudioFormat: Ref<string> = ref("WEBM")
-const activeTab: Ref<null | number> = ref(null)
+const selectedAudioFormat = ref<string>("WEBM")
+const activeTab = ref<null | number> (null)
 const sampleName = ref<string>("")	
 
 const recordBtnState = computed<string>(() : "recording-active" | "recording-stopped" => {
@@ -271,17 +271,17 @@ const nameRules = ref([
 ])
 
 onMounted( async () : Promise<void> => {
-	const authUser = await extpay.getUser()
+	user.value = await extpay.getUser()
 
-	if (authUser?.paid) {
-		user.value = authUser
-		jwt.value = await refreshToken(authUser.email)
+	if (user.value?.paid) {
+		user.value.token = await refreshToken(user.value.email)
+		selectedAudioFormat.value = "WAV"
 	}
 
 	getSavedRecordings()
 })
 
-const setRecordingStatus = async (status) : Promise<void> => {
+const toggleRecordingStatus = async (status) : Promise<void> => {
 	isRecording.value = status === "start-recording" ? true : false 
 
 	chrome.runtime.sendMessage({

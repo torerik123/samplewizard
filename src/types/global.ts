@@ -10,4 +10,5 @@ export interface ExtPayUser {
 	paidAt: Date | null
 	trialStartedAt: Date | null
 	id?: string
+	token?: string
 }
