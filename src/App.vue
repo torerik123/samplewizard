@@ -57,7 +57,7 @@
 					<v-window-item :value="0">
 						<!-- Sample Name  -->
 						<v-row dense v-if="audioSrc">
-							<v-col>
+							<v-col>	
 								<v-form
 									ref="form" 
 									validate-on="lazy"
@@ -154,6 +154,16 @@
 							</v-col>
 						</v-row>
 
+						<!-- Upload success / failure -->
+						<v-snackbar 
+							:timeout="2000"
+							close-on-content-click
+							timer
+							:text="snackbarText"
+							v-model="showSnackbar"
+							:color="snackbarColor"
+						></v-snackbar>
+
 						<!-- Log in  -->
 						<LoginOrSignupBtn
 							v-if="showLoginMessage"  
@@ -183,6 +193,7 @@ import AppLogo from './components/AppLogo.vue';
 import AppLibrary from './components/AppLibrary.vue';
 import RecordButton from './components/RecordButton.vue';
 import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
+import { c } from 'vite/dist/node/types.d-aGj9QkWt.js';
 
 // Types 
 // import { File, Email } from "./types/global"
@@ -191,6 +202,7 @@ import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
 // Set headers when uploading files
 // Loading spinner while uploading file to library 
 // Save filename to files table, enable tags?
+// Supabase StorageError type missing property statusCode?
 
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
@@ -210,9 +222,8 @@ const showLoginMessage = computed<boolean>(() : boolean => {
 	return audioSrc.value && !user.value
 })
 
-// Styles
 
-
+// Audio
 interface AudioFormatOption {
 	title: string
 	value: string
@@ -221,7 +232,6 @@ interface AudioFormatOption {
 	}
 }
 
-// Audio
 const audioFormats: Ref<Array<AudioFormatOption>>= ref([
 	{
 		title: "WEBM",
@@ -291,6 +301,11 @@ const deleteAudio = () : void => {
 	chrome.storage.local.remove(["new_recording"])
 }	
 
+// Show snackbar on upload success/error 
+const snackbarText = ref("Saved to library!")
+const snackbarColor = ref<"success" | "error">("success")
+const showSnackbar = ref<boolean>(false)
+
 const saveToLibrary = async () => {
 	const { valid } = await form.value.validate()
 	console.log("saving - " + sampleName.value)
@@ -308,7 +323,23 @@ const saveToLibrary = async () => {
 		// supabase.auth.setSession(session)
 
 		const user_id = await getUserId(user.value.email)
-		uploadFile(audioSrc.value, user_id, sampleName.value)
+		const { error } = await uploadFile(audioSrc.value, user_id, sampleName.value)
+
+		if (error) {
+			showSnackbar.value = true
+			snackbarColor.value = "error"
+
+			if (error.statusCode === "409") {
+				snackbarText.value = "A file with that name already exists."
+			} else {
+				snackbarText.value = "Upload failed! Please try again later or contact support."
+			}
+		} else {
+			// Success
+			showSnackbar.value = true
+			snackbarColor.value = "success"
+			snackbarText.value = "Saved to library!"
+		}		
 	}
 	
 }
