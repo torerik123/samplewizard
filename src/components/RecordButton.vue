@@ -6,7 +6,7 @@
 			class="elevation-0"
 			size="x-large"
 			data-test="recordButton"
-			@click="$emit('setRecordingStatus', 'start-recording')"
+			@click="$emit('toggleRecordingStatus', 'start-recording')"
 		>
 			<template #prepend>
 				<v-icon 
@@ -23,7 +23,7 @@
 			class="elevation-0"
 			size="x-large"
 			data-test="recordButton"
-			@click="$emit('setRecordingStatus', 'stop-recording')"
+			@click="$emit('toggleRecordingStatus', 'stop-recording')"
 		>
 			Stop recording
 		</v-btn>
@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 const emits = defineEmits<{
-	(e: "setRecordingStatus"): void
+	(e: "toggleRecordingStatus", status: string): void
 }>()
 
 const props = defineProps({
