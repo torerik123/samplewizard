@@ -1,7 +1,6 @@
 import { ref, type Ref } from "vue"
 import audioBufferToWav from "audiobuffer-to-wav"
 import { supabase } from "../supabase"
-import type { StorageError } from "@supabase/storage-js"
 
 export const useUtils = () => {
 	const isTranscodingAudio: Ref<boolean> = ref(false)
@@ -117,6 +116,27 @@ export const useUtils = () => {
 				},
 			}
 		}
+	}
+
+	const deleteFile = async (sampleName: string, uuid: string) => {
+		if (!sampleName || !uuid) {
+			console.error("Missing SAMPLENAME or UUID")
+			return
+		}
+
+		const filePath = `${uuid}/${sampleName}`
+
+		const { error } = await supabase
+		.storage
+		.from('uploaded_files')
+		.remove([filePath])
+
+		if (error) {
+			console.log("Error deleting file: ", error)
+			return
+		}
+
+		console.log("Deleted file: ", sampleName)
 	}
 
 	const transcode = async (
@@ -247,5 +267,6 @@ export const useUtils = () => {
 		uploadFile,
 		refreshToken,
 		getUserId,
+		deleteFile,
 	}
 }

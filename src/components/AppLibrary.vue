@@ -1,5 +1,5 @@
 <template>
-	<div v-if="isLoggedIn">
+	<div v-if="user?.paid">
 		<v-sheet color="transparent" v-if="!userFiles.length">
 			<v-card text="You have no saved files." />
 		</v-sheet>
@@ -18,6 +18,7 @@
 						:src="file.url"
 						variant="list"
 						:title="file.name"
+						@delete="deleteFromLibrary(file.name)"
 					/>
 				</v-col>
 			</v-row>
@@ -30,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type Ref, onMounted } from "vue"
+import { ref, type Ref, onMounted, computed } from "vue"
 import LoginOrSignupBtn from "../components/LoginOrSignupBtn.vue"
 import ExtPay from "../../Extpay.js"
 import { supabase } from "../supabase";
@@ -39,37 +40,39 @@ import { supabase } from "../supabase";
 import AudioVisualizer from '../components/AudioVisualizer.vue';
 import { useUtils } from "../composables/useUtils";
 
+// Types 
+import { type ExtPayUser } from '../types/global.js';
+
 // TODO
+// X - Delete
 // Download 
-// Delete
 // JWT AUTH
-// Loading spinner while getting files
+// Loading spinner getting files + deleting
 // Get storage bucket types
 
 const extpay = ExtPay('samplewizard')
-const isLoggedIn = ref<boolean>(false)
+const user = ref<ExtPayUser>()
 
 const userFiles = ref<File[]>([])
 const jwt = ref()
 const {
 	refreshToken, 
-	getUserId 
+	getUserId,
+	deleteFile,
 } = useUtils()
 
-const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
+const fetchUserFiles = async () : Promise<File[]> => {
 // TODO
 	// Fix Array return type
 	// Move to useUtils 
 	// JWT => EMAIL
 
 	let files = []
-	// Get UUID
-	const user_id = await getUserId(userEmail)
 
 	const { data, error } = await supabase
 		.storage
 		.from('uploaded_files')
-		.list(user_id, {
+		.list(user.value.id, {
 			limit: 100,
 			offset: 0,
 			sortBy: { column: 'name', order: 'asc' },
@@ -84,7 +87,7 @@ const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
 		files = data.filter(file => file.name != ".emptyFolderPlaceholder" ? file : false)
 
 		// Create urls
-		const filenames = files.map(file =>  `${user_id}/${file.name}`)
+		const filenames = files.map(file =>  `${user.value.id}/${file.name}`)
 
 		const { data: signedUrls, error } = await supabase
 			.storage
@@ -108,15 +111,19 @@ const fetchUserFiles = async (userEmail: string) : Promise<File[]> => {
 	return files
 }
 
+const deleteFromLibrary = async (filename: string) => {
+	deleteFile(filename, user.value.id)
+
+	userFiles.value = userFiles.value.filter(item => item.name !== filename)
+}
 
 onMounted( async () : Promise<void> => {
-	const authUser = await extpay.getUser()
+	user.value = await extpay.getUser()
 
-	if (authUser?.paid) {	
-		isLoggedIn.value = true
-
-		jwt.value = await refreshToken(authUser.email)
-		const files = await fetchUserFiles(authUser.email)
+	if (user.value?.paid) {	
+		user.value.id = await getUserId(user.value.email)
+		jwt.value = await refreshToken(user.value.email)
+		const files = await fetchUserFiles()
 		
 		if (files && files.length) {
 			userFiles.value = files

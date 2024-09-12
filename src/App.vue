@@ -196,6 +196,7 @@ import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
 import { c } from 'vite/dist/node/types.d-aGj9QkWt.js';
 
 // Types 
+import { type ExtPayUser } from './types/global.js';
 // import { File, Email } from "./types/global"
 
 // TODO 
@@ -207,14 +208,6 @@ import { c } from 'vite/dist/node/types.d-aGj9QkWt.js';
 // Auth + Payment
 const extpay = ExtPay('samplewizard')
 const jwt = ref()
-
-interface ExtPayUser {
-	email: string
-	installedAt: Date
-	paid: boolean
-	paidAt: Date | null
-	trialStartedAt: Date | null
-}
 
 const user: Ref<ExtPayUser | false> = ref(false)
 

@@ -74,7 +74,7 @@
 				<v-row dense no-gutters>
 					<v-col cols="auto">									
 						<v-btn 
-							@click="downloadFileUrl(src)"
+							@click="$emit('download')"
 							icon="mdi-download" 
 							variant="text"
 							size="small"
@@ -82,6 +82,7 @@
 					</v-col>
 					<v-col cols="auto">
 						<v-btn 
+							@click="$emit('delete')"
 							icon="mdi-trash-can" 
 							variant="text"
 							size="small"
@@ -98,7 +99,6 @@
 import { ref, onMounted, nextTick } from 'vue';
 import type { Ref } from 'vue';
 import WaveSurfer from 'wavesurfer.js'
-import { useUtils } from '../composables/useUtils';
 
 interface Props {
 	src: string,
@@ -116,13 +116,12 @@ const props = withDefaults(defineProps<Props>(), {
 
 defineEmits<{
   (e: 'delete'): void
+  (e: 'download'): void
 }>()
 
 // Play state
 const wavesurfer: Ref<null | object> = ref(null)
 const isPlaying: Ref<boolean> = ref(false)
-
-const { downloadFileUrl } = useUtils()
 
 onMounted(() => {
 	nextTick(() => {
