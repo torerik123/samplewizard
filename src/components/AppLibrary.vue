@@ -1,12 +1,26 @@
 <template>
 	<div v-if="user?.paid">
-		<v-sheet color="transparent" v-if="!userFiles.length">
+		<v-sheet color="transparent" v-if="!sortedFiles.length">
 			<v-card text="You have no saved files." />
 		</v-sheet>
 
 		<v-sheet color="transparent" v-else>
+			<v-row>
+				<v-col cols="auto">
+					<v-radio-group
+						v-model="selectedSortOption"
+						inline
+					>
+					<v-radio
+						v-for="option in sortOptions"
+						:label="option.title"
+						:value="option.value"
+					></v-radio>
+				</v-radio-group>
+				</v-col>
+			</v-row>
 			<v-row
-				v-for="file in userFiles" 
+				v-for="file in sortedFiles" 
 				:key="file.name"
 				dense
 				no-gutters
@@ -46,8 +60,6 @@ import { type ExtPayUser } from '../types/global';
 import type { File } from "../types/global";
 
 // TODO
-// X - Delete
-// Download 
 // JWT AUTH
 // Loading spinner getting files + deleting
 // Get storage bucket types
@@ -55,13 +67,33 @@ import type { File } from "../types/global";
 const extpay = ExtPay('samplewizard')
 const user = ref<ExtPayUser>()
 
-const userFiles = ref<File[]>([])
 const jwt = ref()
 const {
 	refreshToken, 
 	getUserId,
 	deleteFile,
 } = useUtils()
+
+// Files
+type SortOptions = "asc_date" | "desc_date" | "asc_name" | "desc_name"
+
+const selectedSortOption = ref<SortOptions>("desc_date")
+
+const sortOptions = ref([{
+	title: "Most recent",
+	value: "desc_date",
+	},
+	{
+		title: "Name (A - Z)",
+		value: "asc_name",
+	},
+	// {
+	// 	title: "Oldest first",
+	// 	value: "asc_date",
+	// },
+])
+
+const userFiles = ref<File[]>([])
 
 const fetchUserFiles = async () : Promise<File[]> => {
 // TODO
@@ -110,10 +142,14 @@ const fetchUserFiles = async () : Promise<File[]> => {
 				})
 			}
 	}
-	return sortFiles(files, "desc_date")
+	return files
 }
 
-const sortFiles = (files: File[], order: "asc_date" | "desc_date" | "asc_name" | "desc_name" = "desc_date"): File[] => {
+const sortedFiles = computed(() => {
+	return sortFiles(userFiles.value, selectedSortOption.value)
+})
+
+const sortFiles = (files: File[], order: SortOptions = "desc_date"): File[] => {
 	switch (order.toLowerCase()) {
 		case "desc_date":
 			// Sort by date descending
@@ -132,18 +168,20 @@ const sortFiles = (files: File[], order: "asc_date" | "desc_date" | "asc_name" |
 	}
 }
 
-const deleteFromLibrary = async (filename: string) => {
-	deleteFile(filename, user.value.id)
-
-	userFiles.value = userFiles.value.filter(item => item.name !== filename)
-}
-
+// Download / delete
 const downloadLibraryFile = async (file) => {
 	chrome.downloads.download({
 		url: file.url,
 		filename: file.name,
 	})
 }
+
+const deleteFromLibrary = async (filename: string) => {
+	deleteFile(filename, user.value.id)
+
+	userFiles.value = userFiles.value.filter(item => item.name !== filename)
+}
+
 
 onMounted( async () : Promise<void> => {
 	user.value = await extpay.getUser()
