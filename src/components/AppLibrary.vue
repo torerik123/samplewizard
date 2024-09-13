@@ -42,7 +42,8 @@ import AudioVisualizer from '../components/AudioVisualizer.vue';
 import { useUtils } from "../composables/useUtils";
 
 // Types 
-import { type ExtPayUser } from '../types/global.js';
+import { type ExtPayUser } from '../types/global';
+import type { File } from "../types/global";
 
 // TODO
 // X - Delete
@@ -109,7 +110,26 @@ const fetchUserFiles = async () : Promise<File[]> => {
 				})
 			}
 	}
-	return files
+	return sortFiles(files, "desc_date")
+}
+
+const sortFiles = (files: File[], order: "asc_date" | "desc_date" | "asc_name" | "desc_name" = "desc_date"): File[] => {
+	switch (order.toLowerCase()) {
+		case "desc_date":
+			// Sort by date descending
+			return files.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+		case "asc_date":
+			// Sort by date ascending
+			return files.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+		case "asc_name":
+			// Sort alphabetically ascending
+			return files.sort((a, b) => a.name.localeCompare(b.name))
+		case "desc_name":
+			// Sort alphabetically descending
+			return files.sort((a, b) => b.name.localeCompare(a.name))
+		default:
+			return files
+	}
 }
 
 const deleteFromLibrary = async (filename: string) => {
