@@ -151,6 +151,7 @@
 									text="Save to library"
 									prepend-icon="mdi-file-multiple"
 									block
+									:loading="isSavingToLibrary"
 								/>
 							</v-col>
 						</v-row>
@@ -295,9 +296,11 @@ const deleteAudio = () : void => {
 }	
 
 // Show snackbar on upload success/error 
-const snackbarText = ref("Saved to library!")
+const snackbarText = ref<string>("Saved to library!")
 const snackbarColor = ref<"success" | "error">("success")
 const showSnackbar = ref<boolean>(false)
+
+const isSavingToLibrary = ref<boolean>(false)
 
 const saveToLibrary = async () => {
 	const { valid } = await form.value.validate()
@@ -315,6 +318,7 @@ const saveToLibrary = async () => {
 		// const session = { access_token: authHeader }
 		// supabase.auth.setSession(session)
 
+		isSavingToLibrary.value = true   
 		const user_id = await getUserId(user.value.email)
 		const { error } = await uploadFile(audioSrc.value, user_id, sampleName.value)
 
@@ -333,6 +337,7 @@ const saveToLibrary = async () => {
 			snackbarColor.value = "success"
 			snackbarText.value = "Saved to library!"
 		}		
+		isSavingToLibrary.value = false
 	}
 	
 }
