@@ -1,7 +1,6 @@
 import { ref, type Ref } from "vue"
 import audioBufferToWav from "audiobuffer-to-wav"
 import { supabase } from "../supabase"
-import "vite/client" // Vite client types
 
 export const useUtils = () => {
 	// TODO => Split into file, user/auth logic
@@ -165,7 +164,8 @@ export const useUtils = () => {
 					break
 				case "WAV":
 					// Decode the audio data from WebM into a raw audio format that can be manipulated or re-encoded.
-					const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+					const audioContext = new (window.AudioContext ||
+						window.webkitAudioContext)()
 					const audioSource = audioContext.createBufferSource()
 
 					const response = await fetch(audioUrl)
