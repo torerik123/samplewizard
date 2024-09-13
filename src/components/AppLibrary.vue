@@ -1,6 +1,6 @@
 <template>
 	<div v-if="user?.paid">
-		<v-sheet color="transparent" v-if="!sortedFiles.length">
+		<v-sheet color="transparent" v-if="!isFetchingFiles && !sortedFiles.length">
 			<v-card text="You have no saved files." />
 		</v-sheet>
 
@@ -37,6 +37,18 @@
 					/>
 				</v-col>
 			</v-row>
+
+			<!-- Load more  -->
+			<v-row>
+				<v-col>
+					<v-btn 
+						@click="fetchUserFiles"
+						text="Load more..."
+						block 
+						:loading="isFetchingFiles"
+					/>
+				</v-col>
+			</v-row>
 		</v-sheet>
 	</div>
 
@@ -46,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type Ref, onMounted, computed } from "vue"
+import { ref, type Ref, onMounted, computed, watch } from "vue"
 import LoginOrSignupBtn from "../components/LoginOrSignupBtn.vue"
 import ExtPay from "../../Extpay.js"
 import { supabase } from "../supabase";
@@ -63,11 +75,11 @@ import type { File } from "../types/global";
 // JWT AUTH
 // Loading spinner getting files + deleting
 // Get storage bucket types
+// Fetch initial files in background
 
 const extpay = ExtPay('samplewizard')
 const user = ref<ExtPayUser>()
 
-const jwt = ref()
 const {
 	refreshToken, 
 	getUserId,
@@ -94,8 +106,33 @@ const sortOptions = ref([{
 ])
 
 const userFiles = ref<File[]>([])
+const fileOffset = ref(0)
+const isFetchingFiles = ref(false)
 
 const fetchUserFiles = async () : Promise<File[]> => {
+	isFetchingFiles.value = true
+	let sortOptionsFetch = {}
+
+	switch (selectedSortOption.value) {
+		case "desc_date":
+			// Sort by date descending
+			sortOptionsFetch = { column: 'created_at', order: 'desc' }
+			break
+		case "asc_date":
+			// Sort by date ascending
+			sortOptionsFetch = { column: 'created_at', order: 'asc' }
+			break
+		case "asc_name":
+			// Sort alphabetically ascending
+			sortOptionsFetch = { column: 'name', order: 'asc' }
+			break
+		case "desc_name":
+			// Sort alphabetically descending
+			sortOptionsFetch = { column: 'name', order: 'desc' }
+			break
+		default:
+			break
+	}
 // TODO
 	// Fix Array return type
 	// Move to useUtils 
@@ -107,9 +144,9 @@ const fetchUserFiles = async () : Promise<File[]> => {
 		.storage
 		.from('uploaded_files')
 		.list(user.value.id, {
-			limit: 100,
-			offset: 0,
-			sortBy: { column: 'name', order: 'asc' },
+			limit: 10,
+			offset: fileOffset.value,
+			sortBy: sortOptionsFetch,
 		})
 
 	if (error) {
@@ -129,11 +166,13 @@ const fetchUserFiles = async () : Promise<File[]> => {
 			.createSignedUrls(filenames, 60)
 
 			if (error) {
+				isFetchingFiles.value = false
 				console.warn("Could not get URLs")
 				return
 			}
 
 			if (signedUrls.length) {
+				// Add signed URL to files
 				signedUrls.map((el, index) => {
 					files[index] = {
 						...files[index],
@@ -141,7 +180,22 @@ const fetchUserFiles = async () : Promise<File[]> => {
 					}
 				})
 			}
+
+			if (files && files.length) {
+				// Add new files
+				files.map(newFile => { 
+					const fileExists = userFiles.value.find(existingFile => existingFile.name === newFile.name)
+
+					if (!fileExists) {
+						userFiles.value.push(newFile)
+					}
+				})
+			}
+
+			fileOffset.value = fileOffset.value + 10
 	}
+
+	isFetchingFiles.value = false
 	return files
 }
 
@@ -188,12 +242,8 @@ onMounted( async () : Promise<void> => {
 
 	if (user.value?.paid) {	
 		user.value.id = await getUserId(user.value.email)
-		jwt.value = await refreshToken(user.value.email)
-		const files = await fetchUserFiles()
-		
-		if (files && files.length) {
-			userFiles.value = files
-		}
+		user.value.token = await refreshToken(user.value.email)
+		await fetchUserFiles()
 	}
 })
 </script>

@@ -145,11 +145,12 @@
 							v-if="user && audioSrc"
 							dense 
 						>
-							<v-col cols="auto">
+							<v-col>
 								<v-btn
 									@click="saveToLibrary" 
 									text="Save to library"
 									prepend-icon="mdi-file-multiple"
+									block
 								/>
 							</v-col>
 						</v-row>
@@ -193,7 +194,6 @@ import AppLogo from './components/AppLogo.vue';
 import AppLibrary from './components/AppLibrary.vue';
 import RecordButton from './components/RecordButton.vue';
 import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
-import { c } from 'vite/dist/node/types.d-aGj9QkWt.js';
 
 // Types 
 import { type ExtPayUser } from './types/global.js';
