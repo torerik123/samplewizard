@@ -34,6 +34,7 @@
 						:title="file.name"
 						@delete="deleteFromLibrary(file.name)"
 						@download="downloadLibraryFile(file)"
+						:isDeletingFile="showDeleteSpinner(file.name)"
 					/>
 				</v-col>
 			</v-row>
@@ -87,6 +88,12 @@ const {
 } = useUtils()
 
 // Files
+const deletingFiles = ref<string[]>([])
+
+const showDeleteSpinner = (filename) => {
+	return deletingFiles.value.length ? deletingFiles.value.includes(filename) : false
+}
+
 type SortOptions = "asc_date" | "desc_date" | "asc_name" | "desc_name"
 
 const selectedSortOption = ref<SortOptions>("desc_date")
@@ -231,9 +238,14 @@ const downloadLibraryFile = async (file) => {
 }
 
 const deleteFromLibrary = async (filename: string) => {
+	if (!deletingFiles.value.includes(filename)) {
+		deletingFiles.value.push(filename)
+	}
+
 	deleteFile(filename, user.value.id)
 
 	userFiles.value = userFiles.value.filter(item => item.name !== filename)
+	deletingFiles.value.filter(fileToDelete => fileToDelete !== filename)
 }
 
 

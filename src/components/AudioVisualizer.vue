@@ -87,6 +87,7 @@
 							variant="text"
 							size="small"
 							color="grey"
+							:loading="isDeletingFile"
 						></v-btn>
 					</v-col>
 				</v-row>
@@ -106,12 +107,14 @@ interface Props {
 	progressColor?: string,
 	variant?: "single-file" | "list"
 	title?: string,
+	isDeletingFile?: boolean,
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	waveColor: '#FFF',
 	progressColor: '#e255a1',
 	variant: "single-file",
+	isDeletingFile: false,
 })
 
 defineEmits<{
