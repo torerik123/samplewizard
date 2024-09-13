@@ -5,7 +5,10 @@
 		</v-sheet>
 
 		<v-sheet color="transparent" v-else>
-			<v-row>
+
+			<!-- Sorting options  -->
+
+			<!-- <v-row>
 				<v-col cols="auto">
 					<v-radio-group
 						v-model="selectedSortOption"
@@ -18,7 +21,8 @@
 					></v-radio>
 				</v-radio-group>
 				</v-col>
-			</v-row>
+			</v-row> -->
+			
 			<v-row
 				v-for="file in sortedFiles" 
 				:key="file.name"
@@ -43,6 +47,7 @@
 			<v-row>
 				<v-col>
 					<v-btn 
+						v-if="showLoadMoreBtn"
 						@click="fetchUserFiles"
 						text="Load more..."
 						block 
@@ -113,8 +118,10 @@ const sortOptions = ref([{
 ])
 
 const userFiles = ref<File[]>([])
-const fileOffset = ref(0)
 const isFetchingFiles = ref(false)
+const currentOffset = ref(0)
+const pageLimit = ref(10)
+const showLoadMoreBtn = ref(true)
 
 const fetchUserFiles = async () : Promise<File[]> => {
 	isFetchingFiles.value = true
@@ -151,8 +158,8 @@ const fetchUserFiles = async () : Promise<File[]> => {
 		.storage
 		.from('uploaded_files')
 		.list(user.value.id, {
-			limit: 10,
-			offset: fileOffset.value,
+			limit: pageLimit .value,
+			offset: currentOffset.value,
 			sortBy: sortOptionsFetch,
 		})
 
@@ -199,7 +206,12 @@ const fetchUserFiles = async () : Promise<File[]> => {
 				})
 			}
 
-			fileOffset.value = fileOffset.value + 10
+			currentOffset.value = currentOffset.value + pageLimit.value
+	}
+
+	// Hide load more btn when last file is fetched 
+	if (data.length < pageLimit.value) {
+		showLoadMoreBtn.value = false
 	}
 
 	isFetchingFiles.value = false
