@@ -217,7 +217,6 @@ const {
 	downloadFile, 
 	isTranscodingAudio, 
 	uploadFile, 
-	getUserId,
 } = useUtils()
 
 const showLoginMessage = computed<boolean>(() : boolean => {
@@ -266,7 +265,7 @@ onMounted( async () : Promise<void> => {
 
 	if (user.value?.paid) {
 		selectedAudioFormat.value = "WAV"
-		await fetchUserFiles(user.value.id)
+		fetchUserFiles(user.value.id)
 	}
 
 	getSavedRecordings()

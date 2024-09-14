@@ -4,7 +4,7 @@ import { ExtPayUser, File } from "../types/global"
 import { supabase } from "../supabase"
 import { SortOptions } from "../types/global"
 import ExtPay from "../../Extpay.js"
-import { useUtils } from "../composables/useUtils"
+import { useAuth } from "../composables/useAuth"
 
 
 export const useRootStore = defineStore("root", () => {
@@ -17,7 +17,7 @@ export const useRootStore = defineStore("root", () => {
 	const showLoadMoreBtn = ref<boolean>(true)
 
 	async function getUserData() {
-		const { getUserId, refreshToken } = useUtils()
+		const { getUserId, refreshToken } = useAuth()
 		const extpay_user = await extpay.getUser()
 		const id = await getUserId(extpay_user.email)
 		const token = await refreshToken(extpay_user.email)
@@ -76,11 +76,7 @@ export const useRootStore = defineStore("root", () => {
 
 		if (error) {
 			console.error("Error fetching files", error)
-			return fetchedFiles
-		}
-
-		if (!data || !data.length) {
-			console.log("No data or no files found.")
+			isFetchingFiles.value = false
 			return fetchedFiles
 		}
 

@@ -87,8 +87,6 @@ const {
 const { fetchUserFiles } = useRootStore() 
 
 const {
-	refreshToken, 
-	getUserId,
 	deleteFile,
 } = useUtils()
 
@@ -156,12 +154,4 @@ const deleteFromLibrary = async (filename: string) => {
 	files.value = files.value.filter(item => item.name !== filename)
 	deletingFiles.value.filter(fileToDelete => fileToDelete !== filename)
 }
-
-
-onMounted( async () : Promise<void> => {
-	if (user.value?.paid) {	
-		user.value.id = await getUserId(user.value.email)
-		user.value.token = await refreshToken(user.value.email)
-	}
-})
 </script>
