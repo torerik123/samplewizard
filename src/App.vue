@@ -196,36 +196,35 @@ import AppLibrary from './components/AppLibrary.vue';
 import RecordButton from './components/RecordButton.vue';
 import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
 
-// Types 
-import { type ExtPayUser } from './types/global.js';
-// import { File, Email } from "./types/global"
+import { useRootStore } from './stores/root.js';
+import { storeToRefs } from 'pinia'
+
+import { AudioFormatOption } from './types/global';
 
 // TODO 
 // Set headers when uploading files
-// Loading spinner while uploading file to library 
 // Save filename to files table, enable tags?
-// Supabase StorageError type missing property statusCode?
 
-// Auth + Payment
-const extpay = ExtPay('samplewizard')
-const jwt = ref()
+// User data + files
+const { user } = storeToRefs(useRootStore())
+const { 
+	fetchUserFiles,
+	getUserData,
+ } = useRootStore()
 
-const user: Ref<ExtPayUser> = ref()
+ const { 
+	highlightColor,
+	downloadFile, 
+	isTranscodingAudio, 
+	uploadFile, 
+	getUserId,
+} = useUtils()
 
 const showLoginMessage = computed<boolean>(() : boolean => {
 	return audioSrc.value && !user.value
 })
 
-
 // Audio
-interface AudioFormatOption {
-	title: string
-	value: string
-	props?: { 
-		disabled?: boolean 
-	}
-}
-
 const audioFormats: Ref<Array<AudioFormatOption>>= ref([
 	{
 		title: "WEBM",
@@ -243,17 +242,8 @@ const audioFormats: Ref<Array<AudioFormatOption>>= ref([
 	// }
 ])
 
-const { 
-	highlightColor,
-	refreshToken, 
-	downloadFile, 
-	isTranscodingAudio, 
-	uploadFile, 
-	getUserId,
-} = useUtils()
-
-const audioSrc: Ref<string> = ref("")
-const isRecording: Ref<boolean> = ref(false)
+const audioSrc = ref<string>("")
+const isRecording = ref<boolean>(false)
 const selectedAudioFormat = ref<string>("WEBM")
 const activeTab = ref<null | number> (null)
 const sampleName = ref<string>("")	
@@ -272,11 +262,11 @@ const nameRules = ref([
 ])
 
 onMounted( async () : Promise<void> => {
-	user.value = await extpay.getUser()
+	user.value = await getUserData()
 
 	if (user.value?.paid) {
-		user.value.token = await refreshToken(user.value.email)
 		selectedAudioFormat.value = "WAV"
+		await fetchUserFiles(user.value.id)
 	}
 
 	getSavedRecordings()
@@ -311,7 +301,7 @@ const saveToLibrary = async () => {
 		typeof user.value.email === 'string' && 
 		audioSrc.value
 	) {
-		const authHeader = `Bearer ${jwt.value}`
+		const authHeader = `Bearer ${user.value.token}`
 		console.log("GETTING authHeader", authHeader)
 
 		// TODO => Set JWT when making request
@@ -319,7 +309,7 @@ const saveToLibrary = async () => {
 		// supabase.auth.setSession(session)
 
 		isSavingToLibrary.value = true   
-		const user_id = await getUserId(user.value.email)
+		const user_id = user.value.id ? user.value.id : await getUserId(user.value.email) // TODO => Pinia getter
 		const { error } = await uploadFile(audioSrc.value, user_id, sampleName.value)
 
 		if (error) {
@@ -363,10 +353,6 @@ const getSavedRecordings = async () => {
 	)
 
 	isRecording.value = offscreenDocument?.documentUrl?.endsWith('#recording')
-}
-
-const login = () : void => {
-	extpay.openPaymentPage()
 }
 </script>
 

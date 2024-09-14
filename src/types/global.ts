@@ -1,8 +1,19 @@
 import type { Tables } from "./supabasetypes";
 
-export type Email = Tables<"emails">
-// export type File = Tables<"files"> // TODO USE STORAGE TYPES
+// Auth 
+export interface ExtPayUser {
+	email: string
+	installedAt: Date
+	paid: boolean
+	paidAt: Date | null
+	trialStartedAt: Date | null
+	id?: string
+	token?: string
+}
 
+export type Email = Tables<"emails">
+
+// Files 
 export interface File {
 	created_at: string
 	id: string
@@ -23,12 +34,12 @@ export interface FileMetaData {
 	size: number
 }
 
-export interface ExtPayUser {
-	email: string
-	installedAt: Date
-	paid: boolean
-	paidAt: Date | null
-	trialStartedAt: Date | null
-	id?: string
-	token?: string
+export type SortOptions = "asc_date" | "desc_date" | "asc_name" | "desc_name"
+
+export interface AudioFormatOption {
+	title: string
+	value: string
+	props?: { 
+		disabled?: boolean 
+	}
 }
