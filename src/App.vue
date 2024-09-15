@@ -186,7 +186,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import type { Ref, } from 'vue'
-import ExtPay from "../ExtPay.js"
 import { useUtils } from './composables/useUtils.js';
 
 // Components
@@ -206,8 +205,12 @@ import { AudioFormatOption } from './types/global';
 // Save filename to files table, enable tags?
 
 // User data + files
-const { user } = storeToRefs(useRootStore())
 const { 
+	user,
+	files,
+ } = storeToRefs(useRootStore())
+
+ const { 
 	fetchUserFiles,
 	getUserData,
  } = useRootStore()
@@ -217,6 +220,7 @@ const {
 	downloadFile, 
 	isTranscodingAudio, 
 	uploadFile, 
+	getFile,
 } = useUtils()
 
 const showLoginMessage = computed<boolean>(() : boolean => {
@@ -308,8 +312,7 @@ const saveToLibrary = async () => {
 		// supabase.auth.setSession(session)
 
 		isSavingToLibrary.value = true   
-		const user_id = user.value.id ? user.value.id : await getUserId(user.value.email) // TODO => Pinia getter
-		const { error } = await uploadFile(audioSrc.value, user_id, sampleName.value)
+		const { data, error } = await uploadFile(audioSrc.value, user.value.id, sampleName.value)
 
 		if (error) {
 			showSnackbar.value = true
@@ -325,6 +328,15 @@ const saveToLibrary = async () => {
 			showSnackbar.value = true
 			snackbarColor.value = "success"
 			snackbarText.value = "Saved to library!"
+
+			if (data?.path) {
+				// Fetch new file => add to files
+				const newFile = await getFile(data.path)
+
+				if (newFile) [
+					files.value.push(newFile) 
+				]
+			}
 		}		
 		isSavingToLibrary.value = false
 	}

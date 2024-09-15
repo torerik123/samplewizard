@@ -1,116 +1,75 @@
 import { ref, type Ref } from "vue"
 import audioBufferToWav from "audiobuffer-to-wav"
 import { supabase } from "../supabase"
+import { type File } from "../types/global"
+import { useRootStore } from "../stores/root"
+import { storeToRefs } from "pinia"
 
 export const useUtils = () => {
 	const isTranscodingAudio: Ref<boolean> = ref(false)
 	const highlightColor: Ref<string> = ref("#e255a1")
 
-	const getUserId = async (email: string): Promise<string> => {
-		// Get UUID
-		let {
-			data: { user_id },
-			error,
-		} = await supabase
-			.from("emails")
-			.select("user_id")
-			.eq("user_email", email)
-			.single()
-
-		if (error) {
-			console.log(error)
+	const getFile = async (pathName: string) : Promise<File | false> => {
+		if (!pathName) {
+			console.error("Missing params PATHNAME")
+			return false
 		}
 
-		if (!user_id) {
-			console.warn("User not found.")
-			return ""
-		}
-		return user_id
-	}
-
-	const getJwtToken = async (email: string) => {
-		// Get JWT token from supabase edge function
 		try {
-			const response = await fetch(
-				"https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${
-							import.meta.env.VITE_SUPABASE_ANON_KEY
-						}`,
-					},
-					body: JSON.stringify({ email }),
-				}
+			// Check store for existing file
+			const filename = pathName.split("/").at(-1)
+			const { files } = storeToRefs(useRootStore())
+
+			const fileExists = files.value.find(
+				(item) => item.name === filename
 			)
 
-			if (!response.ok) {
-				throw new Error(`Error: ${response.statusText}`)
+			if (fileExists) {
+				return fileExists
 			}
 
-			const data = await response.json()
-			return data.token
-		} catch (error) {
-			console.error("Failed to get JWT token", error)
-			return null
-		}
-	}
+			// Create signed url
+			const { data: signedUrlData, error: signedUrlError } =
+				await supabase.storage
+					.from("uploaded_files")
+					.createSignedUrls([pathName], 60)
 
-	const refreshToken = async (email: string) => {
-		// Check for existing token => if not => get new token
-
-		// TODO => Check if token is valid
-		let { samplewizard_jwt } = await chrome.storage.local.get([
-			"samplewizard_jwt",
-		])
-
-		if (!samplewizard_jwt) {
-			const newToken = await getJwtToken(email)
-
-			await chrome.storage.local.set({ samplewizard_jwt: newToken })
-			console.log("New token: ", newToken)
-			samplewizard_jwt = newToken
-		}
-
-		console.log("Received JWT Token:", samplewizard_jwt)
-
-		return samplewizard_jwt
-	}
-
-	const downloadFile = async (
-		audioSrc: string,
-		audioFormat: string,
-		sampleName?: string
-	): Promise<void> => {
-		try {
-			console.log("AUDIOTYPE", typeof audioSrc)
-			const file = await transcode(audioSrc, audioFormat)
-
-			if (sampleName) {
-				chrome.downloads.download({
-					url: file,
-					filename: sampleName + `.` + audioFormat,
-				})
-			} else {
-				chrome.downloads.download({ url: file })
+			if (signedUrlError) {
+				console.error("Error generating signed URL", signedUrlError)
+				return
 			}
-			console.log("File downloaded!")
+
+			const signedUrl = signedUrlData[0].signedUrl
+
+			const newFile: File = {
+				created_at: new Date().toISOString(),
+				id: pathName,
+				last_accessed_at: new Date().toISOString(),
+				name: filename,
+				updated_at: new Date().toISOString(),
+				url: signedUrl, 
+			}
+
+			return newFile
 		} catch (error) {
-			console.log(error)
-			alert("Something went wrong, please try again later")
+			console.error("Error getting file.")
 		}
 	}
 
 	interface UploadSuccess {
 		success: boolean
+		data?: {
+			fullPath: string
+			id: string
+			path: string
+		} 
 		error?: {
 			type?: string
 			message: string
 			statusCode: string | number
 		}
 	}
-
+	
 	const uploadFile = async (
 		blobUrl: string,
 		uuid: string,
@@ -129,7 +88,7 @@ export const useUtils = () => {
 			const pathName = `${uuid}/${filename}`
 
 			// Upload file
-			const { error: uploadError } = await supabase.storage
+			const { data, error: uploadError } = await supabase.storage
 				.from("uploaded_files")
 				.upload(pathName, file, {
 					cacheControl: "3600",
@@ -150,7 +109,7 @@ export const useUtils = () => {
 			}
 
 			console.log("File uploaded successfully!")
-			return { success: true }
+			return { success: true, data }
 		} catch (err) {
 			console.error("An error occurred:", err)
 
@@ -165,6 +124,29 @@ export const useUtils = () => {
 					statusCode: "500",
 				},
 			}
+		}
+	}
+	
+	const downloadFile = async (
+		audioSrc: string,
+		audioFormat: string,
+		sampleName?: string
+	): Promise<void> => {
+		try {
+			const file = await transcode(audioSrc, audioFormat)
+
+			if (sampleName) {
+				chrome.downloads.download({
+					url: file,
+					filename: sampleName + `.` + audioFormat,
+				})
+			} else {
+				chrome.downloads.download({ url: file })
+			}
+			console.log("File downloaded!")
+		} catch (error) {
+			console.log(error)
+			alert("Something went wrong, please try again later")
 		}
 	}
 
@@ -193,16 +175,15 @@ export const useUtils = () => {
 		base64AudioData: string,
 		outputFormat: string
 	): Promise<string> => {
-		isTranscodingAudio.value = true
-
+		// Convert base64 string to blob for transcoding
 		if (!outputFormat) {
 			throw Error("Missing output audio format")
 		}
 
+		isTranscodingAudio.value = true
 		let transcodedAudio = null
 
 		try {
-			// Convert base64 string to blob for transcoding
 			const audioBlob = base64ToBlob(base64AudioData, "audio/webm")
 			const audioUrl = URL.createObjectURL(audioBlob)
 
@@ -263,10 +244,8 @@ export const useUtils = () => {
 		downloadFile,
 		transcode,
 		base64ToBlob,
-		getJwtToken,
 		uploadFile,
-		refreshToken,
-		getUserId,
 		deleteFile,
+		getFile,
 	}
 }
