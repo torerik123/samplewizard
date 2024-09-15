@@ -1,26 +1,26 @@
-import { supabase } from "../../supabase/client"
+import { createCustomSupabaseClient } from "../../supabase/client"
 
 export const useAuth = () => { 
 	const getUserId = async (email: string): Promise<string> => {
-		// Get UUID
-		let {
-			data: { user_id },
-			error,
-		} = await supabase
-			.from("emails")
-			.select("user_id")
-			.eq("user_email", email)
-			.single()
-
-		if (error) {
-			console.log(error)
+		try {
+			const token = await getJwtToken(email)
+			
+			let {
+				data: { user_id },
+			} = await createCustomSupabaseClient(token)
+				.from("emails")
+				.select("user_id")
+				.eq("user_email", email)
+				.single()
+	
+			if (!user_id) {
+				console.warn("User not found.")
+				return user_id
+			}
+			return user_id
+		} catch (error) {
+			console.error("Failed to get user ID",error)
 		}
-
-		if (!user_id) {
-			console.warn("User not found.")
-			return ""
-		}
-		return user_id
 	}
 
 	const getJwtToken = async (email: string) => {
@@ -56,10 +56,12 @@ export const useAuth = () => {
 		// Check for existing token => if not => get new token
 
 		// TODO => Check if token is valid
-		let { samplewizard_jwt } = await chrome.storage.local.get([
-			"samplewizard_jwt",
-		])
+		// let { samplewizard_jwt } = await chrome.storage.local.get([
+		// 	"samplewizard_jwt",
+		// ])
 
+		// TODO => Check token expiry
+		let samplewizard_jwt = false 
 		if (!samplewizard_jwt) {
 			const newToken = await getJwtToken(email)
 

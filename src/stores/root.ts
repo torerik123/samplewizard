@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { ref } from "vue"
 import { ExtPayUser, File } from "../types/global"
-import { supabase } from "../../supabase/client"
+import { createCustomSupabaseClient } from "../../supabase/client"
 import { SortOptions } from "../types/global"
 import ExtPay from "../../Extpay.js"
 import { useAuth } from "../composables/useAuth"
@@ -64,9 +64,7 @@ export const useRootStore = defineStore("root", () => {
 				break
 		}
 
-		// TODO
-		// JWT => EMAIL
-		const { data, error } = await supabase.storage
+		const { data, error } = await createCustomSupabaseClient(user.value.token).storage
 			.from("uploaded_files")
 			.list(user.value.id, {
 				limit: pageLimit.value,
@@ -89,7 +87,7 @@ export const useRootStore = defineStore("root", () => {
 				(file) => `${user.value.id}/${file.name}`
 			)
 
-			const { data: signedUrls, error: signedUrlsError  } = await supabase.storage
+			const { data: signedUrls, error: signedUrlsError  } = await createCustomSupabaseClient().storage
 				.from("uploaded_files")
 				.createSignedUrls(filenames, 60)
 

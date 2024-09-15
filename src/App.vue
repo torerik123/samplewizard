@@ -201,7 +201,6 @@ import { storeToRefs } from 'pinia'
 import { AudioFormatOption } from './types/global';
 
 // TODO 
-// Set headers when uploading files
 // Save filename to files table, enable tags?
 
 // User data + files
@@ -304,13 +303,6 @@ const saveToLibrary = async () => {
 		typeof user.value.email === 'string' && 
 		audioSrc.value
 	) {
-		const authHeader = `Bearer ${user.value.token}`
-		console.log("GETTING authHeader", authHeader)
-
-		// TODO => Set JWT when making request
-		// const session = { access_token: authHeader }
-		// supabase.auth.setSession(session)
-
 		isSavingToLibrary.value = true   
 		const { data, error } = await uploadFile(audioSrc.value, user.value.id, sampleName.value)
 
