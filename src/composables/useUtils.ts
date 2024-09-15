@@ -1,6 +1,6 @@
 import { ref, type Ref } from "vue"
 import audioBufferToWav from "audiobuffer-to-wav"
-import { supabase } from "../supabase"
+import { supabase } from "../../supabase/client"
 import { type File } from "../types/global"
 import { useRootStore } from "../stores/root"
 import { storeToRefs } from "pinia"

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { ref } from "vue"
 import { ExtPayUser, File } from "../types/global"
-import { supabase } from "../supabase"
+import { supabase } from "../../supabase/client"
 import { SortOptions } from "../types/global"
 import ExtPay from "../../Extpay.js"
 import { useAuth } from "../composables/useAuth"

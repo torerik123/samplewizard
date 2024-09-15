@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 
 // Types 
-import { Database } from "./types/supabasetypes"
+import { Database } from "../src/types/supabasetypes"
 
 export const supabase = createClient<Database>(
 	'https://pysnzshgeafotwtersgp.supabase.co', 

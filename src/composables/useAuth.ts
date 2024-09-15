@@ -1,4 +1,4 @@
-import { supabase } from "../supabase"
+import { supabase } from "../../supabase/client"
 
 export const useAuth = () => { 
 	const getUserId = async (email: string): Promise<string> => {
