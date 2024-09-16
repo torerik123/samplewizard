@@ -29,7 +29,7 @@ const props = defineProps<{
 
 const { highlightColor } = useUtils()
 
-const extpay = ExtPay('samplewizard')
+const extpay = ExtPay('samplewizard-subscription')
 
 const login = () : void => {
 	extpay.openPaymentPage()

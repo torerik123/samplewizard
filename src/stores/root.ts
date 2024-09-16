@@ -9,7 +9,7 @@ export const useRootStore = defineStore("root", () => {
 	const files = ref<File[]>([])
 	const isFetchingFiles = ref<boolean>(false)
 	const currentOffset = ref<number>(0)
-	const pageLimit = ref<number>(10)
+	const pageLimit = ref<number>(50)
 	const showLoadMoreBtn = ref<boolean>(true)
 
 	async function fetchUserFiles(

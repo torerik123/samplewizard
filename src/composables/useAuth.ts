@@ -1,4 +1,5 @@
 import { supabase } from "../../supabase/client"
+import { parseJwt } from "../../supabase/functions/sign-jwt/jwt.js"
 
 export const useAuth = () => { 
 	const getUserId = async (email: string): Promise<string> => {
@@ -23,7 +24,12 @@ export const useAuth = () => {
 
 	const getJwtToken = async (email: string) => {
 		// Get JWT token from supabase edge function
+		if (!email) {
+			return
+		}
+
 		try {
+
 			const response = await fetch(
 				"https://pysnzshgeafotwtersgp.supabase.co/functions/v1/sign-jwt",
 				{
@@ -51,19 +57,23 @@ export const useAuth = () => {
 	}
 
 	const refreshToken = async (email: string) : Promise<string> => {
+		if (!email) {
+			return 
+		}
+		
 		// Check for existing token => if not => get new token
-
-		// TODO => Check if token is valid
 		let { samplewizard_jwt } = await chrome.storage.local.get([
 			"samplewizard_jwt",
 		])
 
-		// TODO => Check token expiry
-		if (!samplewizard_jwt) {
+		// Check logged in users email matches email in JWT payload
+		const decodedToken = parseJwt(samplewizard_jwt)
+
+		if (!samplewizard_jwt || decodedToken.email !== email) {
+			console.log("Setting new token.")
 			const newToken = await getJwtToken(email)
 
 			await chrome.storage.local.set({ samplewizard_jwt: newToken })
-			console.log("New token: ", newToken)
 			samplewizard_jwt = newToken
 		}
 

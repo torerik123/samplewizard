@@ -142,7 +142,7 @@
 						</v-row>
 
 						<v-row 
-							v-if="user && audioSrc"
+							v-if="audioSrc && user?.paid"
 							dense 
 						>
 							<v-col>
@@ -227,10 +227,8 @@ const {
 	getFile,
 } = useUtils()
 
-const loadingUserData = ref<boolean>(false)
-
 const showLoginMessage = computed<boolean>(() : boolean => {
-	return audioSrc.value && !loadingUserData.value && !user.value
+	return audioSrc.value && !user.value?.paid
 })
 
 // Audio
@@ -274,29 +272,42 @@ onMounted( async () : Promise<void> => {
 	// Get recent recording from locolStorage
 	getSavedRecordings()
 
-	loadingUserData.value = true 
-
 	// Get JWT
-	const extpay = ExtPay('samplewizard')
-	user.value = await extpay.getUser()
+	const extpay = ExtPay('samplewizard-subscription')
 
+	// const extpay = ExtPay('samplewizard')
+	const extpay_user = await extpay.getUser()
+
+	if (extpay_user) {
+		setUserData(extpay_user)
+	} 
+
+	// extpay.onPaid.addListener(user => {
+	// 	console.log('user paid!')
+	// 	setUserData(user)
+	// })
+})
+
+const setUserData = async (extpay_user) => {
+	user.value = extpay_user
 	const token = await refreshToken(user.value.email)
 
 	// Initialize supabase with JWT 
-	await initSupabase(token)
+	if (token) {
+		await initSupabase(token)
 
-	// Set user data
-	const id = await getUserId(user.value.email)
-	
-	user.value.id = id
-	user.value.token = token 
-	loadingUserData.value = true 
-
-	if (user.value?.paid) {
-		selectedAudioFormat.value = "WAV"
-		fetchUserFiles(id)
+		// Set user data
+		const id = await getUserId(user.value.email)
+		
+		user.value.id = id
+		user.value.token = token 
+		
+		if (user.value?.paid) {
+			selectedAudioFormat.value = "WAV"
+			fetchUserFiles(id)
+		}
 	}
-})
+}
 
 const toggleRecordingStatus = async (status) : Promise<void> => {
 	isRecording.value = status === "start-recording" ? true : false 

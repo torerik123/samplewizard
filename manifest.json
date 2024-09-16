@@ -1,24 +1,30 @@
 {
 	"manifest_version": 3,
 	"name": "SampleWizard",
-	"version": "1.0.0",
-	"action": { 
+	"version": "2.0.0",
+	"action": {
 		"default_popup": "index.html"
-		 
 	},
+	"content_scripts": [
+		{
+			"matches": ["https://extensionpay.com/*"],
+			"js": ["ExtPay.js"],
+			"run_at": "document_start"
+		}
+	],
 	"icons": {
 		"48": "hat48.png",
 		"128": "witch-hat.png"
-	  },
+	},
 	"background": {
 		"service_worker": "background.js",
-		"scripts": [ "Extpay.js" ],
+		"scripts": ["Extpay.js"],
 		"type": "module"
 	},
 	"web_accessible_resources": [
 		{
-		"resources": ["offscreen.html", "offscreen.js"],
-		"matches": ["<all_urls>"]
+			"resources": ["offscreen.html", "offscreen.js"],
+			"matches": ["<all_urls>"]
 		}
 	],
 	"permissions": [
@@ -29,8 +35,5 @@
 		"storage",
 		"downloads"
 	],
-	"host_permissions": [
-		"https://extensionpay.com/*"
-	]
+	"host_permissions": ["https://extensionpay.com/*"]
 }
-  

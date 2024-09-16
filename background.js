@@ -1,11 +1,15 @@
 import ExtPay from "./ExtPay.js"
 
-const extpay = ExtPay('samplewizard')
+// const extpay = ExtPay('samplewizard')
+const extpay = ExtPay('samplewizard-subscription')
+
 extpay.startBackground(); // this line is required to use ExtPay in the rest of your extension
 
 extpay.getUser().then(user => {
 	console.log("user:", user)
 })
+
+// TODO => Update user data in store on login
 
 const getCurrentTab = async () => {
     let queryOptions = { 
