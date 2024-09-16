@@ -1,13 +1,11 @@
-import { createCustomSupabaseClient } from "../../supabase/client"
+import { supabase } from "../../supabase/client"
 
 export const useAuth = () => { 
 	const getUserId = async (email: string): Promise<string> => {
 		try {
-			const token = await getJwtToken(email)
-			
 			let {
 				data: { user_id },
-			} = await createCustomSupabaseClient(token)
+			} = await supabase
 				.from("emails")
 				.select("user_id")
 				.eq("user_email", email)
@@ -52,16 +50,15 @@ export const useAuth = () => {
 		}
 	}
 
-	const refreshToken = async (email: string) => {
+	const refreshToken = async (email: string) : Promise<string> => {
 		// Check for existing token => if not => get new token
 
 		// TODO => Check if token is valid
-		// let { samplewizard_jwt } = await chrome.storage.local.get([
-		// 	"samplewizard_jwt",
-		// ])
+		let { samplewizard_jwt } = await chrome.storage.local.get([
+			"samplewizard_jwt",
+		])
 
 		// TODO => Check token expiry
-		let samplewizard_jwt = false 
 		if (!samplewizard_jwt) {
 			const newToken = await getJwtToken(email)
 

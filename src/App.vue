@@ -187,6 +187,9 @@
 import { ref, onMounted, computed } from 'vue'
 import type { Ref, } from 'vue'
 import { useUtils } from './composables/useUtils.js';
+import ExtPay from "../Extpay.js"
+import { initSupabase } from "../supabase/client"
+
 
 // Components
 import AudioVisualizer from './components/AudioVisualizer.vue';
@@ -199,6 +202,7 @@ import { useRootStore } from './stores/root.js';
 import { storeToRefs } from 'pinia'
 
 import { AudioFormatOption } from './types/global';
+import { useAuth } from './composables/useAuth.js'
 
 // TODO 
 // Save filename to files table, enable tags?
@@ -211,8 +215,9 @@ const {
 
  const { 
 	fetchUserFiles,
-	getUserData,
  } = useRootStore()
+
+ const { refreshToken, getUserId} = useAuth()
 
  const { 
 	highlightColor,
@@ -222,8 +227,10 @@ const {
 	getFile,
 } = useUtils()
 
+const loadingUserData = ref<boolean>(false)
+
 const showLoginMessage = computed<boolean>(() : boolean => {
-	return audioSrc.value && !user.value
+	return audioSrc.value && !loadingUserData.value && !user.value
 })
 
 // Audio
@@ -264,14 +271,31 @@ const nameRules = ref([
 ])
 
 onMounted( async () : Promise<void> => {
-	user.value = await getUserData()
+	// Get recent recording from locolStorage
+	getSavedRecordings()
+
+	loadingUserData.value = true 
+
+	// Get JWT
+	const extpay = ExtPay('samplewizard')
+	user.value = await extpay.getUser()
+
+	const token = await refreshToken(user.value.email)
+
+	// Initialize supabase with JWT 
+	await initSupabase(token)
+
+	// Set user data
+	const id = await getUserId(user.value.email)
+	
+	user.value.id = id
+	user.value.token = token 
+	loadingUserData.value = true 
 
 	if (user.value?.paid) {
 		selectedAudioFormat.value = "WAV"
-		fetchUserFiles(user.value.id)
+		fetchUserFiles(id)
 	}
-
-	getSavedRecordings()
 })
 
 const toggleRecordingStatus = async (status) : Promise<void> => {

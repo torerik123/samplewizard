@@ -1,6 +1,6 @@
 import { ref, type Ref } from "vue"
 import audioBufferToWav from "audiobuffer-to-wav"
-import { createCustomSupabaseClient } from "../../supabase/client"
+import { supabase } from "../../supabase/client"
 import { type File } from "../types/global"
 import { useRootStore } from "../stores/root"
 import { storeToRefs } from "pinia"
@@ -30,7 +30,7 @@ export const useUtils = () => {
 
 			// Create signed url
 			const { data: signedUrlData, error: signedUrlError } =
-				await createCustomSupabaseClient().storage
+				await supabase.storage
 					.from("uploaded_files")
 					.createSignedUrls([pathName], 60)
 
@@ -88,7 +88,7 @@ export const useUtils = () => {
 			const pathName = `${uuid}/${filename}`
 
 			// Upload file
-			const { data, error: uploadError } = await createCustomSupabaseClient().storage
+			const { data, error: uploadError } = await supabase.storage
 				.from("uploaded_files")
 				.upload(pathName, file, {
 					cacheControl: "3600",
@@ -158,7 +158,7 @@ export const useUtils = () => {
 
 		const filePath = `${uuid}/${sampleName}`
 
-		const { error } = await createCustomSupabaseClient()
+		const { error } = await supabase
 		.storage
 		.from('uploaded_files')
 		.remove([filePath])

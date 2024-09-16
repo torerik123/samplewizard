@@ -1,35 +1,16 @@
 import { defineStore } from "pinia"
 import { ref } from "vue"
 import { ExtPayUser, File } from "../types/global"
-import { createCustomSupabaseClient } from "../../supabase/client"
+import { supabase } from "../../supabase/client"
 import { SortOptions } from "../types/global"
-import ExtPay from "../../Extpay.js"
-import { useAuth } from "../composables/useAuth"
-
 
 export const useRootStore = defineStore("root", () => {
-	const extpay = ExtPay('samplewizard')
 	const user = ref<ExtPayUser>(null)
 	const files = ref<File[]>([])
 	const isFetchingFiles = ref<boolean>(false)
 	const currentOffset = ref<number>(0)
 	const pageLimit = ref<number>(10)
 	const showLoadMoreBtn = ref<boolean>(true)
-
-	async function getUserData() {
-		const { getUserId, refreshToken } = useAuth()
-		const extpay_user = await extpay.getUser()
-		const id = await getUserId(extpay_user.email)
-		const token = await refreshToken(extpay_user.email)
-
-		const user = {
-			...extpay_user,
-			id,
-			token,
-		}
-		
-		return user
-	}
 
 	async function fetchUserFiles(
 		userId: string,
@@ -64,7 +45,7 @@ export const useRootStore = defineStore("root", () => {
 				break
 		}
 
-		const { data, error } = await createCustomSupabaseClient(user.value.token).storage
+		const { data, error } = await supabase.storage
 			.from("uploaded_files")
 			.list(user.value.id, {
 				limit: pageLimit.value,
@@ -87,7 +68,7 @@ export const useRootStore = defineStore("root", () => {
 				(file) => `${user.value.id}/${file.name}`
 			)
 
-			const { data: signedUrls, error: signedUrlsError  } = await createCustomSupabaseClient().storage
+			const { data: signedUrls, error: signedUrlsError  } = await supabase.storage
 				.from("uploaded_files")
 				.createSignedUrls(filenames, 60)
 
@@ -138,7 +119,6 @@ export const useRootStore = defineStore("root", () => {
 		files,
 		isFetchingFiles,
 		fetchUserFiles,
-		getUserData,
 		showLoadMoreBtn,
 	 }
 })
