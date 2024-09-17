@@ -188,6 +188,7 @@ import { ref, onMounted, computed } from 'vue'
 import type { Ref, } from 'vue'
 import { useUtils } from './composables/useUtils.js';
 import ExtPay from "../Extpay.js"
+import { subscriptionPlan, lifetimePlan } from "../extpay_default.js"
 import { initSupabase } from "../supabase/client"
 
 
@@ -273,19 +274,13 @@ onMounted( async () : Promise<void> => {
 	getSavedRecordings()
 
 	// Get JWT
-	const extpay = ExtPay('samplewizard-subscription')
+	const extpay = ExtPay(subscriptionPlan)
 
-	// const extpay = ExtPay('samplewizard')
 	const extpay_user = await extpay.getUser()
 
 	if (extpay_user) {
 		setUserData(extpay_user)
 	} 
-
-	// extpay.onPaid.addListener(user => {
-	// 	console.log('user paid!')
-	// 	setUserData(user)
-	// })
 })
 
 const setUserData = async (extpay_user) => {

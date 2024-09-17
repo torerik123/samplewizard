@@ -21,6 +21,7 @@
 
 <script setup lang="ts">
 import ExtPay from "../../Extpay.js"
+import { subscriptionPlan } from "../../extpay_default.js"
 import { useUtils } from "../composables/useUtils.js";
 
 const props = defineProps<{
@@ -29,7 +30,7 @@ const props = defineProps<{
 
 const { highlightColor } = useUtils()
 
-const extpay = ExtPay('samplewizard-subscription')
+const extpay = ExtPay(subscriptionPlan)
 
 const login = () : void => {
 	extpay.openPaymentPage()
