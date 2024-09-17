@@ -3,10 +3,6 @@
 		dense 
 	>
 		<v-col class="pa-0">
-			<p class="mb-2 text-caption" v-if="message">
-				{{ message }} 
-			</p>
-			
 			<v-btn
 				variant="outlined"
 				:color="highlightColor"
@@ -15,6 +11,11 @@
 			>
 				Log in/register
 			</v-btn>
+		</v-col>
+		<v-col cols="12">
+			<p class="mb-2 text-caption" v-if="message">
+				{{ message }} 
+			</p>
 		</v-col>
 	</v-row>
 </template>
@@ -34,5 +35,6 @@ const extpay = ExtPay(subscriptionPlan)
 
 const login = () : void => {
 	extpay.openPaymentPage()
+	// extpay.openTrialPage() // => No email
 }
 </script>

@@ -45,9 +45,10 @@ export const createJWT = async (payload, secret) => {
 export const parseJwt = (token) => {
     try {
 		if (!token) {
-			console.warn("Missing token")
+			// console.warn("Missing token")
 			return 
 		}
+
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const jsonPayload = decodeURIComponent(

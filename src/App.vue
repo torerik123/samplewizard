@@ -112,7 +112,7 @@
 						<v-row 
 							v-if="audioSrc"
 							dense
-							class="mb-1"
+							class="mb-3"
 						>
 							<v-col 
 								class="py-0"
@@ -150,7 +150,7 @@
 
 						<v-row 
 							v-if="audioSrc && user?.paid"
-							dense 
+							dense
 						>
 							<v-col>
 								<v-btn
@@ -176,7 +176,7 @@
 						<!-- Log in  -->
 						<LoginOrSignupBtn
 							v-if="showLoginMessage"  
-						 	message="To dowload files in WAV format you need a premium account." 
+						 	message="You don't have an active subscription. Log in or register to enable WAV downloads and library." 
 						/>
 					</v-window-item>
 
