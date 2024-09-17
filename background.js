@@ -18,10 +18,6 @@ extpay.onPaid.addListener((user) => {
 	})
 })
 
-// If already paid and logged in??
-
-
-// TODO => Update user data in store on login
 
 const getCurrentTab = async () => {
     let queryOptions = { 

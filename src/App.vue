@@ -47,6 +47,13 @@
 								text="Library"
 								prepend-icon="mdi-file-multiple"
 							/>
+							<v-tab
+								v-if="user?.paid" 
+								density="compact"
+								:value="2"
+								text="Settings"
+								prepend-icon="mdi-cog"
+							/>
 						</v-tabs>
 					</v-col>
 					<v-spacer />
@@ -54,6 +61,7 @@
 		
 				<!-- TODO => Component for recording tab  -->
 				<v-window v-model="activeTab" style="padding: 4px;">
+					<!-- TODO => Seperate to own component  -->
 					<v-window-item :value="0">
 						<!-- Sample Name  -->
 						<v-row dense v-if="audioSrc">
@@ -100,7 +108,6 @@
 							</v-col>
 						</v-row>
 
-						<!-- TODO => Seperate to own component  -->
 						<!-- Download  -->
 						<v-row 
 							v-if="audioSrc"
@@ -173,8 +180,17 @@
 						/>
 					</v-window-item>
 
+					<!-- Library  -->
 					<v-window-item :value="1">
 						<AppLibrary />
+					</v-window-item>
+
+					<!-- Settings  -->
+					<v-window-item
+						v-if="user?.paid" 
+						:value="2"
+					>
+						<AppSettings/>
 					</v-window-item>
 				</v-window>	
 			</v-sheet>
@@ -189,13 +205,13 @@ import type { Ref, } from 'vue'
 import { useUtils } from './composables/useUtils.js';
 import ExtPay from "../Extpay.js"
 import { subscriptionPlan, lifetimePlan } from "../extpay_default.js"
-import { initSupabase } from "../supabase/client"
-
+import { initSupabase, supabase } from "../supabase/client"
 
 // Components
 import AudioVisualizer from './components/AudioVisualizer.vue';
 import AppLogo from './components/AppLogo.vue';
 import AppLibrary from './components/AppLibrary.vue';
+import AppSettings from './components/AppSettings.vue';
 import RecordButton from './components/RecordButton.vue';
 import LoginOrSignupBtn from "./components/LoginOrSignupBtn.vue"
 
@@ -287,9 +303,37 @@ onMounted( async () : Promise<void> => {
 		if (message.type === "user-paid") {
 			console.log("received message!", message)
 			setUserData(message.data)
+			createSupabaseUser(message.data.email)
 		}
 	})
 })
+
+const createSupabaseUser = async (email) => {
+	try {
+		if (!supabase) {
+			const token = await refreshToken(email)
+			await initSupabase(token)
+		}
+
+		// Check if user exists
+		let { data: existingEmail } = await supabase
+		.from("emails")
+		.select("user_email")
+		.eq("user_email", email)
+
+		if (!existingEmail.length) {
+			// Create supabase user id after registering
+			const { data, error } = await supabase
+			.from('emails')
+			.insert([
+			{ user_email: email, },
+			])
+			.select()
+		} 
+	} catch (error) {
+		console.log("ERROR creating user", error)
+	}
+}
 
 const setUserData = async (extpay_user) => {
 	user.value = extpay_user
