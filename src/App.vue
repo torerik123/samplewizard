@@ -281,6 +281,14 @@ onMounted( async () : Promise<void> => {
 	if (extpay_user) {
 		setUserData(extpay_user)
 	} 
+
+	// Update user data after payment / login
+	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => { 
+		if (message.type === "user-paid") {
+			console.log("received message!", message)
+			setUserData(message.data)
+		}
+	})
 })
 
 const setUserData = async (extpay_user) => {
