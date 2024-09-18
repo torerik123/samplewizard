@@ -67,7 +67,7 @@ describe("RecordButton", () => {
 		expect(startBtn.text()).toBe('Start recording')
 		await startBtn.trigger('click')
 
-		expect(wrapper.emitted().setRecordingStatus).toEqual([ [ "start-recording" ] ])	
+		expect(wrapper.emitted().toggleRecordingStatus).toEqual([ [ "start-recording" ] ])	
 		
 		// Update btn text
 		await wrapper.setProps({ buttonState: "recording-active" })
@@ -80,7 +80,7 @@ describe("RecordButton", () => {
 		// Stop 
 		await stopBtn.trigger('click')
 
-		expect(wrapper.emitted().setRecordingStatus[1]).toEqual( ["stop-recording"] )	
+		expect(wrapper.emitted().toggleRecordingStatus[1]).toEqual( ["stop-recording"] )	
 		
 		await wrapper.setProps({ buttonState: "recording-stopped" })
 

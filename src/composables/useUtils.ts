@@ -76,6 +76,9 @@ export const useUtils = () => {
 		sampleName: string
 	): Promise<UploadSuccess> => {
 		try {
+			if (!uuid) {
+				throw Error("Missing user id")
+			}
 			// Fetch the blob and create a file
 			const filename = `${sampleName}.wav`
 			const response = await fetch(blobUrl)
