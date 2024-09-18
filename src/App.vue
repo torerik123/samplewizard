@@ -203,8 +203,6 @@
 import { ref, onMounted, computed } from 'vue'
 import type { Ref, } from 'vue'
 import { useUtils } from './composables/useUtils.js';
-import ExtPay from "../Extpay.js"
-import { subscriptionPlan, lifetimePlan } from "../extpay_default.js"
 import { initSupabase, supabase } from "../supabase/client"
 
 // Components
@@ -289,17 +287,19 @@ onMounted( async () : Promise<void> => {
 	// Get recent recording from locolStorage
 	getSavedRecordings()
 
-	// Get JWT
-	const extpay = ExtPay(subscriptionPlan)
-
-	const extpay_user = await extpay.getUser()
-
-	if (extpay_user) {
-		setUserData(extpay_user)
-	} 
+	// Set extpay user data + get JWT
+	chrome.runtime.sendMessage({
+		type: "fetch-user",
+	})
 
 	// Update user data after payment / login
-	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => { 
+	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => {
+		if (message.type === "set-user-data") {
+			if (message?.data) {
+				setUserData(message.data)
+			}
+		}
+
 		if (message.type === "user-paid") {
 			console.log("received message!", message)
 			setUserData(message.data)

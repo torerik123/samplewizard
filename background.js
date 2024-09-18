@@ -18,25 +18,7 @@ extpay.onPaid.addListener((user) => {
 	})
 })
 
-
-const getCurrentTab = async () => {
-    let queryOptions = { 
-		active: true, 
-		// lastFocusedWindow: true
-	 };
-    // `tab` will either be a `tabs.Tab` instance or `undefined`.
-    let [tab] = await chrome.tabs.query(queryOptions);
-    return tab;
-  }
-
-// TODO 
-// Open with keyboard shortcut
-// chrome.commands.onCommand.addListener(function(command) {
-// 	if( command.name == "showcontentdialog") {
-// 		chrome.tabs.executeScript({ file: "main.js" })
-// 	}
-// })
-
+// Messages
 chrome.runtime.onMessage.addListener(async(message) => {
 	switch (message.type) {
 		case "start-recording":
@@ -112,9 +94,38 @@ chrome.runtime.onMessage.addListener(async(message) => {
 				console.log(error);
 			}
 		break
+		case "manage-subscription":
+			extpay.openPaymentPage()
+		break
+		case "fetch-user":
+			const user = await extpay.getUser()
+			console.log("FETCHING USER")
+			chrome.runtime.sendMessage({
+				type: "set-user-data",
+				data: user,
+			})
 		default: break
 	}
 })
+
+const getCurrentTab = async () => {
+    let queryOptions = { 
+		active: true, 
+		// lastFocusedWindow: true
+	 };
+    // `tab` will either be a `tabs.Tab` instance or `undefined`.
+    let [tab] = await chrome.tabs.query(queryOptions);
+    return tab;
+  }
+
+// TODO 
+// Open with keyboard shortcut
+// chrome.commands.onCommand.addListener(function(command) {
+// 	if( command.name == "showcontentdialog") {
+// 		chrome.tabs.executeScript({ file: "main.js" })
+// 	}
+// })
+
 
 
 

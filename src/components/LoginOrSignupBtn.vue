@@ -7,13 +7,17 @@
 				variant="outlined"
 				:color="highlightColor"
 				block
-				@click="login"
+				@click="manageSubscription"
 			>
 				Log in/register
 			</v-btn>
 		</v-col>
 		<v-col cols="12">
-			<p class="mb-2 text-caption" v-if="message">
+			<p 
+				v-if="message"
+				class="mb-2 text-caption"
+				data-test="loginBtnMessage" 
+			>
 				{{ message }} 
 			</p>
 		</v-col>
@@ -21,8 +25,6 @@
 </template>
 
 <script setup lang="ts">
-import ExtPay from "../../Extpay.js"
-import { subscriptionPlan } from "../../extpay_default.js"
 import { useUtils } from "../composables/useUtils.js";
 
 const props = defineProps<{
@@ -31,10 +33,10 @@ const props = defineProps<{
 
 const { highlightColor } = useUtils()
 
-const extpay = ExtPay(subscriptionPlan)
 
-const login = () : void => {
-	extpay.openPaymentPage()
-	// extpay.openTrialPage() // => No email
+const manageSubscription = () => {
+	chrome.runtime.sendMessage({
+		type: "manage-subscription"
+	})
 }
 </script>

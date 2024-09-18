@@ -11,11 +11,10 @@
 </template>
 
 <script setup lang="ts">
-import { subscriptionPlan } from "../../extpay_default.js"
-import ExtPay from "../../ExtPay.js"
 
 const manageSubscription = () => {
-	const extpay = ExtPay(subscriptionPlan)
-	extpay.openPaymentPage()
+	chrome.runtime.sendMessage({
+		type: "manage-subscription"
+	})
 }
 </script>
