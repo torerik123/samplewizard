@@ -1,5 +1,8 @@
-import { VueWrapper, mount, shallowMount } from "@vue/test-utils";
-import { describe, expect, it, beforeEach,  } from "vitest";
+import { VueWrapper, mount, shallowMount } from "@vue/test-utils"
+import { describe, expect, it, beforeEach,  } from "vitest"
+import { createTestingPinia } from '@pinia/testing'
+import { useRootStore } from "../stores/root"
+import ExtPay from '../../Extpay.js'
 
 // Vuetify
 import { createVuetify } from 'vuetify'
@@ -11,12 +14,23 @@ const vuetify = createVuetify({
   directives,
 })
 
-import AppLogo from "../components/AppLogo.vue";
-import RecordButton from "../components/RecordButton.vue";
-import AudioVisualizer from "../components/AudioVisualizer.vue";
+// Components
+import AppLogo from "../components/AppLogo.vue"
+import AppLibrary from "../components/AppLibrary.vue"
+import RecordButton from "../components/RecordButton.vue"
+import AudioVisualizer from "../components/AudioVisualizer.vue"
+import LoginOrSignupBtn from "../components/LoginOrSignupBtn.vue"
 
 // Fixtures
 import { webmSrc } from "./fixtures/webmSrc";
+import App from "../App.vue"
+
+// Mock chrome.runtime
+global.chrome = {
+	runtime: {
+	sendMessage: vi.fn()  // Mock sendMessage
+	}
+}
 
 describe("Logo", () => {
 	it("Render logo with correct color", () => {
@@ -160,4 +174,59 @@ describe('AudioVisualizer - List View', () => {
 		expect(waveform.exists()).toBe(true)
 	})
 })
+
+describe('LoginButton.vue', () => {
+	it('Renders login button and message', () => {
+		const notLoggedInText = "You don't have an active subscription. Log in or register to enable WAV downloads and library."
+
+		const wrapper = mount(LoginOrSignupBtn, {
+			global: {
+				plugins: [vuetify]
+			},
+			props: {
+				message: notLoggedInText
+			}
+		})
+
+		// Check if the button is rendered
+		const button = wrapper.get('[data-test=loginOrSignupBtn]')
+		expect(button.exists()).toBe(true)
+		expect(button.text()).toBe('Log in/register')
+
+		// Message
+		const message = wrapper.get('[data-test=loginOrSignupBtnMessage]')
+		expect(message.exists()).toBe(true)
+		expect(message.text()).toBe(notLoggedInText)
+	})
+  
+	it("Does not render message if message prop is not provided", () => {
+		const wrapper = mount(LoginOrSignupBtn, {
+			global: {
+				plugins: [vuetify],
+			},
+		})
+
+		const message = wrapper.find('[data-test="loginBtnMessage"]')
+		expect(message.exists()).toBe(false)
+	})
+  
+	it("Calls chrome.runtime.sendMessage on button click", async () => {
+		const wrapper = mount(LoginOrSignupBtn, {
+			global: {
+				plugins: [vuetify],
+			},
+		})
+
+		// Find the button and trigger a click event
+		const button = wrapper.find('[data-test="loginOrSignupBtn"]')
+		await button.trigger("click")
+
+		// Assert that chrome.runtime.sendMessage was called
+		expect(global.chrome.runtime.sendMessage).toHaveBeenCalledWith({
+			type: "manage-subscription",
+		})
+	})
+})
+
+
 

@@ -8,6 +8,7 @@
 				:color="highlightColor"
 				block
 				@click="manageSubscription"
+				data-test="loginOrSignupBtn" 
 			>
 				Log in/register
 			</v-btn>
@@ -16,7 +17,7 @@
 			<p 
 				v-if="message"
 				class="mb-2 text-caption"
-				data-test="loginBtnMessage" 
+				data-test="loginOrSignupBtnMessage" 
 			>
 				{{ message }} 
 			</p>
