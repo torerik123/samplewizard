@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
 let recorder;
 let data = [];
 
-async function startRecording(streamId) {
+async function startRecording({ streamId, tabName }) {
 	if (recorder?.state === "recording") {
 		throw new Error(
 			"Called startRecording while recording is in progress."
@@ -55,7 +55,10 @@ async function startRecording(streamId) {
 
 			chrome.runtime.sendMessage({
 				type: "save-recording",
-				data: base64String,
+				data: {
+					recording: base64String,
+					tabName,
+				},
 			})
         } 
 

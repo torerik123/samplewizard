@@ -422,13 +422,20 @@ const getSavedRecordings = async () => {
 	const savedAudio = await chrome.storage.local.get(["new_recording"])
 	
 	if (savedAudio.new_recording) {
-		audioSrc.value = savedAudio.new_recording
+		audioSrc.value = savedAudio.new_recording.recording
+		sampleName.value = savedAudio.new_recording?.tabName ? savedAudio.new_recording.tabName : ""
 	}
 
 	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => { 
 		if (message.type === "recording-saved") {
 			const result = await chrome.storage.local.get(["new_recording"])
-			audioSrc.value = result["new_recording"]	
+			const data = result["new_recording"]
+			audioSrc.value = data.recording
+
+			// TODO && Setting for default name enabled
+			if (data?.tabName.length) {
+				sampleName.value = sanitizeFilename(data.tabName)
+			} 
 		}
 	})
 
@@ -438,6 +445,14 @@ const getSavedRecordings = async () => {
 	)
 
 	isRecording.value = offscreenDocument?.documentUrl?.endsWith('#recording')
+}
+
+const sanitizeFilename = (filename: string) : string => {
+	return filename
+    // Replace disallowed characters with an underscore
+    .replace(/[^a-zA-Z0-9-_\.]/g, '_')
+    // Optionally, convert to lowercase for consistency
+    // .toLowerCase();
 }
 </script>
 

@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener(async(message) => {
 			chrome.action.setBadgeText({ text: ' ' })
 
 			let recording = false;
-			const { id } = await getCurrentTab()
+			const { id, title: tabName } = await getCurrentTab()
 			const offscreenDocument = await chrome.runtime.getContexts({
 				contextTypes: ['OFFSCREEN_DOCUMENT'],
 			});
@@ -60,7 +60,10 @@ chrome.runtime.onMessage.addListener(async(message) => {
 			chrome.runtime.sendMessage({
 				type: 'start-offscreen-recording',
 				target: 'offscreen',
-				data: streamId
+				data: {
+					streamId,
+					tabName
+				}
 			});
 		break
 
@@ -75,20 +78,22 @@ chrome.runtime.onMessage.addListener(async(message) => {
 
 		case "save-recording":
 			const timestamp = Date.now()	
-
 			try {
 				await chrome.storage.local.set({
-					"new_recording": message.data
-					// ["recording_" + timestamp]: message.data
+					// "new_recording": message.data
+					"new_recording": {
+						recording: message.data.recording,
+						tabName: message.data.tabName, // Save the tab name along with the recording
+					}
 				})
 
-				const result = await chrome.storage.local.get(["recording_" + timestamp])
+				// const result = await chrome.storage.local.get(["recording_" + timestamp])
 
 				await chrome.offscreen.closeDocument()
 				
 				chrome.runtime.sendMessage({
 					type: "recording-saved",
-					data: { id: timestamp },
+					// data: { id: timestamp },
 				})
 			} catch(error) {
 				console.log(error);

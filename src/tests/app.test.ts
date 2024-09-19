@@ -1,8 +1,10 @@
 import { VueWrapper, mount, shallowMount } from "@vue/test-utils"
 import { describe, expect, it, beforeEach,  } from "vitest"
+
+// Pinia
+import { setActivePinia, createPinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
 import { useRootStore } from "../stores/root"
-import ExtPay from '../../Extpay.js'
 
 // Vuetify
 import { createVuetify } from 'vuetify'
@@ -142,7 +144,7 @@ describe("AudioVisualizer - single file view", () => {
 	})
 })
 
-describe('AudioVisualizer - List View', () => {
+describe("AudioVisualizer - List View", () => {
 	it('renders correctly in list view', async () => {
 		const wrapper = mount(AudioVisualizer, {
 			global: {
@@ -175,7 +177,7 @@ describe('AudioVisualizer - List View', () => {
 	})
 })
 
-describe('LoginButton.vue', () => {
+describe("LoginButton", () => {
 	it('Renders login button and message', () => {
 		const notLoggedInText = "You don't have an active subscription. Log in or register to enable WAV downloads and library."
 
@@ -226,6 +228,153 @@ describe('LoginButton.vue', () => {
 			type: "manage-subscription",
 		})
 	})
+})
+
+describe("AppLibrary", () => {
+	it("Only show files to logged in users", () => {
+		const wrapper = mount(AppLibrary, {
+			global: {
+				plugins: [vuetify, createTestingPinia()],
+			},
+		})
+
+		const files = wrapper.findAll("[data-test=audioVisualizerListView]")
+		expect(files.length).toBe(0)
+		expect(wrapper.text()).toContain(
+			"Log in/register The library feature is only available to premium users."
+		)
+	})
+
+	it.skip("TODOO: Renders the AudioVisualizer for each file in sortedFiles", async () => {
+		// Mount the component
+		const wrapper = mount(AppLibrary, {
+			global: {
+				plugins: [vuetify, createTestingPinia({
+					initialState: {
+						files: [
+							{ name: "File 1", url: "file1.mp3", created_at: new Date() },
+							{ name: "File 2", url: "file2.mp3", created_at: new Date() },
+						],
+					},
+				})],
+			},
+			components: AudioVisualizer
+		})
+
+		// Mock store with files
+		const store = useRootStore()
+		expect(store.files.length).toBe(2)
+
+		// // Wait for next tick to ensure component updates
+		// await wrapper.vm.$nextTick()
+
+		// // Find all AudioVisualizer components
+		// const audioVisualizers = wrapper.findAllComponents(AudioVisualizer)
+		// const audioVisualizers = wrapper.findAll("data-test=audioVisualizerListView")
+
+		// // Check that the correct number of AudioVisualizer components are rendered
+		// expect(audioVisualizers.length).toBe(2)
+
+
+		// Check that the correct props are passed to the AudioVisualizer components
+		// expect(audioVisualizers[0].props("title")).toBe("File 1")
+		// expect(audioVisualizers[1].props("title")).toBe("File 2")
+	})
+
+
+	it.skip("TODO: calls deleteFromLibrary when the delete event is emitted from AudioVisualizer", async () => {
+		const wrapper = mount(AppLibrary, {
+			global: {
+				plugins: [createTestingPinia({ createSpy: vi.fn })],
+			},
+		})
+
+		const store = useRootStore()
+		store.files = [
+			{ name: "File 1", url: "file1.mp3", created_at: new Date() },
+		]
+
+		const audioVisualizer = wrapper.findComponent({
+			name: "AudioVisualizer",
+		})
+		await audioVisualizer.vm.$emit("delete", "File 1")
+
+		expect(useUtils().deleteFile).toHaveBeenCalledWith(
+			"File 1",
+			store.user.id
+		)
+	})
+
+	it.skip("TODO: Renders LoginOrSignupBtn when user is not paid", () => {
+		vi.mock("@/stores/root", () => ({
+			useRootStore: vi.fn(() => ({
+				user: { paid: false },
+			})),
+		}))
+
+		const wrapper = mount(AppLibrary, {
+			global: {
+				plugins: [createTestingPinia({ createSpy: vi.fn })],
+			},
+		})
+
+		const loginBtn = wrapper.findComponent({ name: "LoginOrSignupBtn" })
+		expect(loginBtn.exists()).toBe(true)
+		expect(loginBtn.text()).toContain(
+			"The library feature is only available to premium users."
+		)
+	})
+	
+	it.skip('TODO: shows "Load more" button if showLoadMoreBtn is true', () => {
+		vi.mock("@/stores/root", () => ({
+			useRootStore: vi.fn(() => ({
+				user: { paid: true },
+				files: [],
+				isFetchingFiles: false,
+				showLoadMoreBtn: true,
+			})),
+		}))
+
+		const wrapper = mount(AppLibrary, {
+			global: {
+				plugins: [createTestingPinia({ createSpy: vi.fn })],
+			},
+		})
+
+		const loadMoreBtn = wrapper.find("button")
+		expect(loadMoreBtn.exists()).toBe(true)
+		expect(loadMoreBtn.text()).toBe("Load more...")
+	})
+
+	it.skip('TODO: Calls fetchUserFiles when "Load more" button is clicked', async () => {
+		vi.mock("@/stores/root", () => ({
+			useRootStore: vi.fn(() => ({
+				user: { paid: true },
+				files: [],
+				isFetchingFiles: false,
+				showLoadMoreBtn: true,
+				fetchUserFiles,
+			})),
+		}))
+
+		const wrapper = mount(AppLibrary, {
+			global: {
+				plugins: [createTestingPinia({ createSpy: vi.fn })],
+			},
+		})
+
+		const loadMoreBtn = wrapper.find("button")
+		await loadMoreBtn.trigger("click")
+
+		expect(fetchUserFiles).toHaveBeenCalled()
+	})
+
+})
+
+describe.skip("TODO: App.vue", () => {
+})
+
+describe.skip("TODO: Settings.vue", () => {
 })
 
 
