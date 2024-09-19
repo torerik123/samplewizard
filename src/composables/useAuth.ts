@@ -1,22 +1,24 @@
 import { supabase } from "../../supabase/client"
 import { parseJwt } from "../../supabase/functions/sign-jwt/jwt.js"
+import { UserSettings } from "../types/global"
 
-export const useAuth = () => { 
-	const getUserId = async (email: string): Promise<string> => {
+export const useAuth = () => {
+	const getUserId = async (email: string): Promise<{ user_id: string, settings: UserSettings}> => {
+		// Get user ID and saved settings
 		try {
 			let {
-				data: { user_id },
+				data: userData,
 			} = await supabase
 				.from("emails")
-				.select("user_id")
+				.select("user_id, settings")
 				.eq("user_email", email)
 				.single()
 	
-			if (!user_id) {
+			if (!userData) {
 				console.warn("User not found.")
-				return user_id
+				return userData
 			}
-			return user_id
+			return userData
 		} catch (error) {
 			console.error("Failed to get user ID",error)
 		}

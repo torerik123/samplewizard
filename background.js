@@ -7,6 +7,19 @@ extpay.startBackground(); // this line is required to use ExtPay in the rest of 
 
 extpay.getUser().then((user) => {
 	// console.log("user:", user)
+
+	// if (user.paid && !user.subscriptionCancelAt) {
+	// 	console.log("You're paid!")
+	// } else if (user.paid && user.subscriptionCancelAt) {
+	// 	console.log("Your subscription will end at the next billing cycle")
+	// } else if (user.subscriptionStatus === "past_due") {
+	// 	console.log("You need to update your card!")
+	// 	extpay.openPaymentPage()
+	// } else if (user.subscriptionStatus === "canceled") {
+	// 	console.log("We hope you enjoyed your subscription!")
+	// } else {
+	// 	console.log("You haven't paid yet :( ")
+	// }
 })
 
 extpay.onPaid.addListener((user) => {

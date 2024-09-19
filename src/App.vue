@@ -344,14 +344,15 @@ const setUserData = async (extpay_user) => {
 		await initSupabase(token)
 
 		// Set user data
-		const id = await getUserId(user.value.email)
+		const { user_id, settings} = await getUserId(user.value.email)
 		
-		user.value.id = id
-		user.value.token = token 
+		user.value.id = user_id
+		user.value.token = token
+		user.value.settings = settings 
 		
 		if (user.value?.paid) {
 			selectedAudioFormat.value = "WAV"
-			fetchUserFiles(id)
+			fetchUserFiles(user_id)
 		}
 	}
 }

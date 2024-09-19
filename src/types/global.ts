@@ -1,6 +1,6 @@
 import type { Tables } from "./supabasetypes";
 
-// Auth 
+// User data 
 export interface ExtPayUser {
 	email: string
 	installedAt: Date
@@ -9,9 +9,15 @@ export interface ExtPayUser {
 	trialStartedAt: Date | null
 	id?: string
 	token?: string
+	settings?: UserSettings
 }
 
-export type Email = Tables<"emails">
+export interface UserSettings {
+	tabIsDefaultSampleName?: boolean
+	mutePlayingTab?: boolean
+}
+
+export type EmailRow = Tables<"emails">
 
 // Files 
 export interface File {
