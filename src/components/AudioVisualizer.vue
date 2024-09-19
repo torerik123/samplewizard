@@ -48,9 +48,12 @@
 	</div>
 
 	<!-- Compact/List view  -->
-	 <div v-if="variant === 'list'">
-		<v-row dense align="center">
-			<v-col cols="auto">
+	 <div v-if="variant === 'list'" data-test="audioVisualizerListView">
+		<v-row 
+			dense
+			align="center"
+		>
+			<v-col cols="2">
 				<v-btn 
 					@click="togglePlay"
 					:icon="isPlaying ? 'mdi-pause' : 'mdi-play'"
@@ -60,8 +63,12 @@
 					:color="progressColor"
 				/>
 			</v-col>
-			<v-col>
-				<v-card-subtitle data-test="sampleTitle">{{ title }}</v-card-subtitle>
+			<v-col cols="7">
+				<v-card-subtitle 
+					data-test="sampleTitle" 
+					class="text-truncate"
+				>{{ title }}
+				</v-card-subtitle>
 				<v-sheet>
 					<div 
 						id="waveform" 
@@ -70,7 +77,7 @@
 					/>
 				</v-sheet>
 			</v-col>
-			<v-col cols="auto">
+			<v-col cols="3">
 				<v-row dense no-gutters>
 					<v-col cols="auto">									
 						<v-btn 

@@ -77,8 +77,6 @@ export const useAuth = () => {
 			samplewizard_jwt = newToken
 		}
 
-		console.log("Received JWT Token:", samplewizard_jwt)
-
 		return samplewizard_jwt
 	}
 

@@ -6,7 +6,7 @@ const extpay = ExtPay(subscriptionPlan)
 extpay.startBackground(); // this line is required to use ExtPay in the rest of your extension
 
 extpay.getUser().then((user) => {
-	console.log("user:", user)
+	// console.log("user:", user)
 })
 
 extpay.onPaid.addListener((user) => {
@@ -104,7 +104,7 @@ chrome.runtime.onMessage.addListener(async(message) => {
 		break
 		case "fetch-user":
 			const user = await extpay.getUser()
-			console.log("FETCHING USER")
+
 			chrome.runtime.sendMessage({
 				type: "set-user-data",
 				data: user,
