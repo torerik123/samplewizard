@@ -280,7 +280,8 @@ const recordBtnState = computed<string>(() : "recording-active" | "recording-sto
 // Form 
 const form = ref()
 const nameRules = ref([
-	v => !!v || 'Name is required',
+  v => !!v || 'Name is required',
+  v => /^[a-zA-Z0-9._-]+$/.test(v) || 'Invalid characters in name. Only letters, numbers, dots (.), hyphens (-), and underscores (_) are allowed. Slashes (/) are not allowed.',
 ])
 
 onMounted( async () : Promise<void> => {
@@ -424,7 +425,7 @@ const getSavedRecordings = async () => {
 	
 	if (savedAudio.new_recording) {
 		audioSrc.value = savedAudio.new_recording.recording
-		sampleName.value = savedAudio.new_recording?.tabName ? savedAudio.new_recording.tabName : ""
+		sampleName.value = savedAudio.new_recording?.tabName ? sanitizeFilename(savedAudio.new_recording.tabName) : ""
 	}
 
 	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => { 
@@ -448,13 +449,14 @@ const getSavedRecordings = async () => {
 	isRecording.value = offscreenDocument?.documentUrl?.endsWith('#recording')
 }
 
-const sanitizeFilename = (filename: string) : string => {
+const sanitizeFilename = (filename: string): string => {
 	return filename
-    // Replace disallowed characters with an underscore
-    .replace(/[^a-zA-Z0-9-_\.]/g, '_')
+    // Replace disallowed characters (including slashes) with an underscore
+    .replace(/[^a-zA-Z0-9-_.]/g, '_')
     // Optionally, convert to lowercase for consistency
     // .toLowerCase();
 }
+
 </script>
 
 <style>
