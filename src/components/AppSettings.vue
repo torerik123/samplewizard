@@ -77,13 +77,14 @@ const savingSettings = ref(false)
 
 onMounted(() => {
 	initalState.value = {
-		tabIsDefaultSampleName: user.value.settings?.tabIsDefaultSampleName ? user.value.settings.tabIsDefaultSampleName : false,
-		mutePlayingTab: user.value.settings?.mutePlayingTab ? user.value.settings.mutePlayingTab : false
+		tabIsDefaultSampleName: user.value.settings?.tabIsDefaultSampleName ?? false,
+		mutePlayingTab: user.value.settings?.mutePlayingTab ?? false
 	}
 
 	tabIsDefaultSampleName.value = initalState.value.tabIsDefaultSampleName 
 	mutePlayingTab.value = initalState.value.mutePlayingTab 
 })
+
 
 const settingsChanged = computed(() => {
 	const defaultSampleNameChanged = tabIsDefaultSampleName.value !== initalState.value?.tabIsDefaultSampleName
