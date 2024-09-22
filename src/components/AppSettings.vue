@@ -93,21 +93,30 @@ const settingsChanged = computed(() => {
 })
 
 const updateSettings = async () => {
+	const settings = {
+		tabIsDefaultSampleName: tabIsDefaultSampleName.value,
+		mutePlayingTab: mutePlayingTab.value,
+	}
+
 	try {
 		savingSettings.value = true
-		console.log("SAVING..")
+		console.log("Updating settings..")
 
-		const { data } = await supabase
+		const { error } = await supabase
 			.from('emails')
-			.insert([
-				{
-					settings: {
-						tabIsDefaultSampleName: tabIsDefaultSampleName.value,
-						mutePlayingTab: mutePlayingTab.value
-					}
-				},
-			])
-			.select()
+			.update({
+				settings
+			})
+			.eq('user_id', user.value.id);  // Ensure to target the correct user
+
+		if (!error) {
+			// Update the user settings and initial state to reflect the new settings
+			user.value.settings = settings;
+			initalState.value = settings
+			console.log("Settings updated.")
+		} else {
+			console.error("Failed to update settings", error);
+		}
 	} catch (error) {
 		console.log("Could not update settings. Please try again later or contact support.")
 	} finally {
@@ -119,15 +128,4 @@ const resetSettings = () => {
 	tabIsDefaultSampleName.value = initalState.value.tabIsDefaultSampleName
 	mutePlayingTab.value = initalState.value.mutePlayingTab
 }
-
-
-// const settings = {
-// 	tabIsDefaultSampleName: ref(true),
-// 	mutePlayingTab: ref(true)
-// }
-
-// TODO => Watch settings
-
-// If current settings differ from saved settings => show save btn 
-
 </script>
