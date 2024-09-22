@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
 let recorder;
 let data = [];
 
-async function startRecording({ streamId, tabName }) {
+async function startRecording({ streamId, tabName, mute }) {
 	if (recorder?.state === "recording") {
 		throw new Error(
 			"Called startRecording while recording is in progress."
@@ -36,9 +36,11 @@ async function startRecording({ streamId, tabName }) {
 	// console.log(media); // Check if stream is obtained correctly
 
 	// Continue to play the captured audio to the user.
-	const output = new AudioContext()
-	const source = output.createMediaStreamSource(media)
-	source.connect(output.destination)
+	if (!mute) {
+		const output = new AudioContext()
+		const source = output.createMediaStreamSource(media)
+		source.connect(output.destination)
+	}
 
 	if (!MediaRecorder.isTypeSupported("video/webm; codecs=opus")) {
 		console.error("MediaRecorder does not support the desired codec.");

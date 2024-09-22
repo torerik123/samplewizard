@@ -8,13 +8,12 @@
 			:color="highlightColor"
 		/>
 
-		<!-- <v-switch 
+		<v-switch 
 			v-model="mutePlayingTab"
 			label="Mute playing tab"
 			hide-details
 			:color="highlightColor"
-		/> -->
-
+		/>
 
 		<!-- Save / Cancel  -->
 		<v-row 

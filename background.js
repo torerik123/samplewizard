@@ -40,6 +40,13 @@ chrome.runtime.onMessage.addListener(async(message) => {
 
 			let recording = false;
 			const { id, title: tabName } = await getCurrentTab()
+
+			// Mute playing tab if enabled 
+			if (message.mute) {
+				await chrome.tabs.update(id, { muted: true });
+				console.log("Tab muted");
+			}
+
 			const offscreenDocument = await chrome.runtime.getContexts({
 				contextTypes: ['OFFSCREEN_DOCUMENT'],
 			});
@@ -66,8 +73,8 @@ chrome.runtime.onMessage.addListener(async(message) => {
 
 			// Get a MediaStream for the active tab.
 			const streamId = await chrome.tabCapture.getMediaStreamId({
-				targetTabId: id
-			});
+				targetTabId: id,
+			})
 
 			// Send the stream ID to the offscreen document to start recording.
 			chrome.runtime.sendMessage({
@@ -75,7 +82,8 @@ chrome.runtime.onMessage.addListener(async(message) => {
 				target: 'offscreen',
 				data: {
 					streamId,
-					tabName
+					tabName,
+					mute: message.mute
 				}
 			});
 		break
@@ -87,8 +95,11 @@ chrome.runtime.onMessage.addListener(async(message) => {
 			});
 
 			chrome.action.setBadgeText({ text: '' })
-		break
 
+			  // Unmute the tab after stopping the recording
+			  const { id: currentTabId } = await getCurrentTab(); // Ensure to get the current tab ID again if needed
+			  await chrome.tabs.update(currentTabId, { muted: false });
+			  break;
 		case "save-recording":
 			const timestamp = Date.now()	
 			try {
