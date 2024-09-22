@@ -31,35 +31,31 @@ async function startRecording({ streamId, tabName }) {
 			},
 		},
 		video: false,
-	});
+	})
+
+	// console.log(media); // Check if stream is obtained correctly
 
 	// Continue to play the captured audio to the user.
 	const output = new AudioContext()
 	const source = output.createMediaStreamSource(media)
 	source.connect(output.destination)
 
+	if (!MediaRecorder.isTypeSupported("video/webm; codecs=opus")) {
+		console.error("MediaRecorder does not support the desired codec.");
+	}
+
 	// Start recording
 	recorder = new MediaRecorder(media, { 
 		mimeType: "video/webm; codecs=opus"
 	})
 
-	recorder.ondataavailable = (event) => data.push(event.data);
+	recorder.ondataavailable = (event) => data.push(event.data)
 	recorder.onstop = async () => {
 		const blob = new Blob(data, { type: "video/webm; codecs=opus" })
 
-		// Convert Blob to ArrayBuffer
-		const arrayBuffer = await blob.arrayBuffer()
-
-		// Decode audio data to PCM
-		const audioContext = new AudioContext()
-		const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
-
-		// Create a WAV file with PCM data
-		const wavBlob = createWAVBlob(audioBuffer)
-
 		// Encode to base64 => send to app.vue
 		let reader = new FileReader()
-		reader.readAsDataURL(wavBlob)
+		reader.readAsDataURL(blob)
 		reader.onloadend = function () {
 			let base64String = reader.result
 
@@ -96,73 +92,5 @@ async function stopRecording() {
 
 	// Update current state in URL
 	window.location.hash = "";
-}
-
-function createWAVBlob(audioBuffer) {
-	const numOfChan = audioBuffer.numberOfChannels,
-		length = audioBuffer.length * numOfChan * 2 + 44,
-		buffer = new ArrayBuffer(length),
-		view = new DataView(buffer),
-		channels = [],
-		sampleRate = audioBuffer.sampleRate,
-		bitDepth = 16
-
-	// Write WAV file header, passing the audioBuffer for length info
-	writeWAVHeader(view, sampleRate, numOfChan, bitDepth, audioBuffer)
-
-	// Write audio data
-	let offset = 44
-	for (let i = 0; i < numOfChan; i++) {
-		channels.push(audioBuffer.getChannelData(i))
-	}
-	for (let i = 0; i < audioBuffer.length; i++) {
-		for (let channel = 0; channel < numOfChan; channel++) {
-			let sample = Math.max(-1, Math.min(1, channels[channel][i]))
-			view.setInt16(
-				offset,
-				sample < 0 ? sample * 0x8000 : sample * 0x7fff,
-				true
-			)
-			offset += 2
-		}
-	}
-
-	// Create a Blob with WAV data
-	return new Blob([view], { type: "audio/wav" })
-}
-
-function writeWAVHeader(
-	view,
-	sampleRate,
-	numOfChannels,
-	bitDepth,
-	audioBuffer
-) {
-	/* RIFF identifier */
-	view.setUint32(0, 1380533830, false)
-	/* file length */
-	view.setUint32(4, 36 + audioBuffer.length * numOfChannels * 2, true)
-	/* RIFF type */
-	view.setUint32(8, 1463899717, false)
-	/* format chunk identifier */
-	view.setUint32(12, 1718449184, false)
-	/* format chunk length */
-	view.setUint32(16, 16, true)
-	/* sample format (raw) */
-	view.setUint16(20, 1, true)
-	/* channel count */
-	view.setUint16(22, numOfChannels, true)
-	/* sample rate */
-	view.setUint32(24, sampleRate, true)
-	/* byte rate (sample rate * block align) */
-	view.setUint32(28, (sampleRate * numOfChannels * bitDepth) / 8, true)
-	/* block align (channel count * bytes per sample) */
-	view.setUint16(32, (numOfChannels * bitDepth) / 8, true)
-	/* bits per sample */
-	view.setUint16(34, bitDepth, true)
-	/* data chunk identifier */
-	view.setUint32(36, 1684108385, false)
-	/* data chunk length */
-	view.setUint32(40, audioBuffer.length * numOfChannels * 2, true)
 }
 
