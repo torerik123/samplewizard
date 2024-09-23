@@ -361,24 +361,21 @@ const setUserData = async (extpay_user) => {
 const toggleRecordingStatus = async (status) : Promise<void> => {
 	isRecording.value = status === "start-recording" ? true : false 
 
-	// TODO 
-	// user.value.settings?.trimSilence
-	// Mute playing tab if enabled 
-	const trim = false
-	if (status === "start-recording" && user.value?.settings?.mutePlayingTab) {
+	const mute = user.value?.settings?.mutePlayingTab ?? false
+	const trim = user.value?.settings?.trimSilence ?? false
+
+	if (status === "start-recording") {
 		chrome.runtime.sendMessage({
 			type: status,
-			mute: true,
+			mute,
 			trim,
 		})
 	} else {
+		// Stop 
 		chrome.runtime.sendMessage({
 			type: status,
-			mute: false,
-			trim,
 		})
 	}
-
 }
 
 const deleteAudio = () : void => {

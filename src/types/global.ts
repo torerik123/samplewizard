@@ -15,6 +15,7 @@ export interface ExtPayUser {
 export interface UserSettings {
 	tabIsDefaultSampleName?: boolean
 	mutePlayingTab?: boolean
+	trimSilence?: boolean
 }
 
 export type EmailRow = Tables<"emails">

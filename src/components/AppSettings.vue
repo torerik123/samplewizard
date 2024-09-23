@@ -15,6 +15,13 @@
 			:color="highlightColor"
 		/>
 
+		<v-switch 
+			v-model="trimSilence"
+			label="Auto trim silence"
+			hide-details
+			:color="highlightColor"
+		/>
+
 		<!-- Save / Cancel  -->
 		<v-row 
 			v-if="settingsChanged"
@@ -71,30 +78,36 @@ const { highlightColor } = useUtils()
 
 const tabIsDefaultSampleName = ref<boolean>(false)
 const mutePlayingTab = ref<boolean>(false)
+const trimSilence = ref<boolean>(false)
+
 const initalState = ref<UserSettings>()
 const savingSettings = ref(false)
 
 onMounted(() => {
 	initalState.value = {
 		tabIsDefaultSampleName: user.value.settings?.tabIsDefaultSampleName ?? false,
-		mutePlayingTab: user.value.settings?.mutePlayingTab ?? false
+		mutePlayingTab: user.value.settings?.mutePlayingTab ?? false,
+		trimSilence: user.value.settings?.trimSilence ?? false,
 	}
 
 	tabIsDefaultSampleName.value = initalState.value.tabIsDefaultSampleName 
 	mutePlayingTab.value = initalState.value.mutePlayingTab 
+	trimSilence.value = initalState.value.trimSilence 
 })
 
 
 const settingsChanged = computed(() => {
 	const defaultSampleNameChanged = tabIsDefaultSampleName.value !== initalState.value?.tabIsDefaultSampleName
 	const mutePlayingTabChanged = mutePlayingTab.value !== initalState.value?.mutePlayingTab
-	return defaultSampleNameChanged || mutePlayingTabChanged
+	const trimSilenceChanged = trimSilence.value !== initalState.value?.trimSilence
+	return defaultSampleNameChanged || mutePlayingTabChanged || trimSilenceChanged
 })
 
 const updateSettings = async () => {
 	const settings = {
 		tabIsDefaultSampleName: tabIsDefaultSampleName.value,
 		mutePlayingTab: mutePlayingTab.value,
+		trimSilence: trimSilence.value,
 	}
 
 	try {
@@ -126,5 +139,6 @@ const updateSettings = async () => {
 const resetSettings = () => {
 	tabIsDefaultSampleName.value = initalState.value.tabIsDefaultSampleName
 	mutePlayingTab.value = initalState.value.mutePlayingTab
+	trimSilence.value = initalState.value.trimSilence
 }
 </script>
