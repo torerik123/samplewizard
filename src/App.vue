@@ -361,16 +361,21 @@ const setUserData = async (extpay_user) => {
 const toggleRecordingStatus = async (status) : Promise<void> => {
 	isRecording.value = status === "start-recording" ? true : false 
 
+	// TODO 
+	// user.value.settings?.trimSilence
 	// Mute playing tab if enabled 
+	const trim = false
 	if (status === "start-recording" && user.value?.settings?.mutePlayingTab) {
 		chrome.runtime.sendMessage({
 			type: status,
-			mute: true
+			mute: true,
+			trim,
 		})
 	} else {
 		chrome.runtime.sendMessage({
 			type: status,
-			mute: false
+			mute: false,
+			trim,
 		})
 	}
 

@@ -83,7 +83,8 @@ chrome.runtime.onMessage.addListener(async(message) => {
 				data: {
 					streamId,
 					tabName,
-					mute: message.mute
+					mute: message.mute,
+					trim: message.trim
 				}
 			});
 		break
