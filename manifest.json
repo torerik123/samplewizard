@@ -1,7 +1,8 @@
 {
 	"manifest_version": 3,
 	"name": "SampleWizard",
-	"version": "2.0.0",
+	"version": "2.1.2",
+	"description": "Sample any audio on the web with a click! Record and download audio directly from your browser.",
 	"action": {
 		"default_popup": "index.html"
 	},

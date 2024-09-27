@@ -1,0 +1,80 @@
+{
+  "../../../../@crx/manifest": {
+    "file": "assets/crx-manifest.js-0VIrPXBi.js",
+    "name": "crx-manifest.js",
+    "src": "../../../../@crx/manifest",
+    "isEntry": true
+  },
+  "ExtPay.js": {
+    "file": "assets/ExtPay.js-BJirVD8P.js",
+    "name": "ExtPay.js",
+    "src": "ExtPay.js",
+    "isEntry": true,
+    "imports": [
+      "__commonjsHelpers-C4iS2aBk.js"
+    ]
+  },
+  "ExtPay.js-loader.js": {
+    "file": "assets/ExtPay.js-loader-YmS8HJr_.js",
+    "src": "ExtPay.js-loader.js"
+  },
+  "__commonjsHelpers-C4iS2aBk.js": {
+    "file": "assets/_commonjsHelpers-C4iS2aBk.js",
+    "name": "_commonjsHelpers"
+  },
+  "_browser-BLPaBDq1.js": {
+    "file": "assets/browser-BLPaBDq1.js",
+    "name": "browser",
+    "isDynamicEntry": true,
+    "imports": [
+      "__commonjsHelpers-C4iS2aBk.js"
+    ]
+  },
+  "background.js": {
+    "file": "assets/background.js-DqasvSH0.js",
+    "name": "background.js",
+    "src": "background.js",
+    "isEntry": true,
+    "imports": [
+      "ExtPay.js",
+      "__commonjsHelpers-C4iS2aBk.js"
+    ]
+  },
+  "index.html": {
+    "file": "assets/index.html-Dxy3dd2O.js",
+    "name": "index.html",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "__commonjsHelpers-C4iS2aBk.js"
+    ],
+    "dynamicImports": [
+      "_browser-BLPaBDq1.js"
+    ],
+    "css": [
+      "assets/index-75eCNnAK.css"
+    ],
+    "assets": [
+      "assets/materialdesignicons-webfont-CSr8KVlo.eot",
+      "assets/materialdesignicons-webfont-Dp5v-WZN.woff2",
+      "assets/materialdesignicons-webfont-PXm3-2wK.woff",
+      "assets/materialdesignicons-webfont-B7mPwVP_.ttf"
+    ]
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot": {
+    "file": "assets/materialdesignicons-webfont-CSr8KVlo.eot",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf": {
+    "file": "assets/materialdesignicons-webfont-B7mPwVP_.ttf",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff": {
+    "file": "assets/materialdesignicons-webfont-PXm3-2wK.woff",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2": {
+    "file": "assets/materialdesignicons-webfont-Dp5v-WZN.woff2",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2"
+  }
+}
