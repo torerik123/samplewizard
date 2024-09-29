@@ -346,16 +346,18 @@ describe("AppLibrary", () => {
 		expect(store.files).toEqual([]) // After deletion, the file list should be empty
 	})
 
-	it.skip("TODO: Renders LoginOrSignupBtn when user is not paid", () => {
-		vi.mock("@/stores/root", () => ({
-			useRootStore: vi.fn(() => ({
-				user: { paid: false },
-			})),
-		}))
-
+	it("Renders LoginOrSignupBtn when user is not paid", () => {
 		const wrapper = mount(AppLibrary, {
 			global: {
-				plugins: [createTestingPinia({ createSpy: vi.fn })],
+				plugins: [
+					createTestingPinia({
+						initialState: {
+							root: {
+								user: { paid: false }, // Mock the user state directly
+							},
+						},
+					}),
+				],
 			},
 		})
 
@@ -365,51 +367,85 @@ describe("AppLibrary", () => {
 			"The library feature is only available to premium users."
 		)
 	})
-	
-	it.skip('TODO: shows "Load more" button if showLoadMoreBtn is true', () => {
-		vi.mock("@/stores/root", () => ({
-			useRootStore: vi.fn(() => ({
-				user: { paid: true },
-				files: [],
-				isFetchingFiles: false,
-				showLoadMoreBtn: true,
-			})),
-		}))
-
+	  
+	it('Shows "Load more" button if showLoadMoreBtn is true', () => {
 		const wrapper = mount(AppLibrary, {
 			global: {
-				plugins: [createTestingPinia({ createSpy: vi.fn })],
+				plugins: [
+					vuetify,
+					createTestingPinia({
+						initialState: {
+							root: {
+								user: { paid: true },
+								showLoadMoreBtn: true,
+								isFetchingFiles: false,
+								files: [
+									{
+										name: "File 1",
+										url: "file1.mp3",
+										created_at: new Date(),
+									},
+								],
+							},
+						},
+					}),
+				],
 			},
 		})
 
-		const loadMoreBtn = wrapper.find("button")
+		// Look for the v-btn component
+		const loadMoreBtn = wrapper.find("[data-test=loadMoreBtn]")
+
+		// Check if the button exists
 		expect(loadMoreBtn.exists()).toBe(true)
+
+		// Verify the text content of the button
 		expect(loadMoreBtn.text()).toBe("Load more...")
 	})
 
-	it.skip('TODO: Calls fetchUserFiles when "Load more" button is clicked', async () => {
-		vi.mock("@/stores/root", () => ({
-			useRootStore: vi.fn(() => ({
-				user: { paid: true },
-				files: [],
-				isFetchingFiles: false,
-				showLoadMoreBtn: true,
-				fetchUserFiles,
-			})),
-		}))
+	
+	const mockFetchUserFiles = vi.fn()
 
+	it('TODO: Calls fetchUserFiles when "Load more" button is clicked', async () => {
+		// Mount the component
 		const wrapper = mount(AppLibrary, {
 			global: {
-				plugins: [createTestingPinia({ createSpy: vi.fn })],
+				plugins: [
+					vuetify,
+					createTestingPinia({
+						initialState: {
+							root: {
+								user: { id: "user123", paid: true }, // Ensure user has an id
+								showLoadMoreBtn: true,
+								isFetchingFiles: false,
+								files: [
+									{
+										name: "File 1",
+										url: "file1.mp3",
+										created_at: new Date(),
+									},
+								],
+							},
+						},
+					}),
+				],
 			},
 		})
 
-		const loadMoreBtn = wrapper.find("button")
+		// Get the store instance
+		const store = useRootStore()
+
+		// Mock the fetchUserFiles function in the store
+		store.fetchUserFiles = mockFetchUserFiles
+
+		await wrapper.vm.$nextTick() // Wait for the component to be fully mounted
+		
+		const loadMoreBtn = wrapper.find("[data-test=loadMoreBtn]")
 		await loadMoreBtn.trigger("click")
-
-		expect(fetchUserFiles).toHaveBeenCalled()
+		
+		expect(mockFetchUserFiles).toHaveBeenCalled()
+		expect(mockFetchUserFiles).toHaveBeenCalledWith("user123")
 	})
-
 })
 
 describe.skip("TODO: App.vue", () => {

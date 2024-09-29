@@ -48,10 +48,11 @@
 				<v-col>
 					<v-btn 
 						v-if="showLoadMoreBtn"
-						@click="fetchUserFiles"
+						@click="fetchUserFiles(user.id)"
 						text="Load more..."
 						block 
 						:loading="isFetchingFiles"
+						data-test="loadMoreBtn"
 					/>
 				</v-col>
 			</v-row>
