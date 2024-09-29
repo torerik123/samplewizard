@@ -135,18 +135,20 @@ const isPlaying: Ref<boolean> = ref(false)
 
 onMounted(() => {
 	nextTick(() => {
-		wavesurfer.value = WaveSurfer.create({
-			container: wavesurfer.value,
-			height: props.variant === "single-file" ? 80 : 20	,
-			waveColor: props.waveColor,
-			progressColor: props.progressColor,
-			url: props.src,
-			normalize: true,
-		})
-
-		wavesurfer.value.on('finish', () => {
-			isPlaying.value = false
-		})
+		if (wavesurfer.value) {
+			wavesurfer.value = WaveSurfer.create({
+				container: wavesurfer.value,
+				height: props.variant === "single-file" ? 80 : 20	,
+				waveColor: props.waveColor,
+				progressColor: props.progressColor,
+				url: props.src,
+				normalize: true,
+			})
+	
+			wavesurfer.value.on('finish', () => {
+				isPlaying.value = false
+			})
+		}
 	})
 })
 
