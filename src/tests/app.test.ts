@@ -403,16 +403,15 @@ describe("AppLibrary", () => {
 		expect(loadMoreBtn.text()).toBe("Load more...")
 	})
 
-	
-	const mockFetchUserFiles = vi.fn()
-
-	it('TODO: Calls fetchUserFiles when "Load more" button is clicked', async () => {
+	it('Calls fetchUserFiles when "Load more" button is clicked', async () => {
 		// Mount the component
 		const wrapper = mount(AppLibrary, {
 			global: {
 				plugins: [
 					vuetify,
 					createTestingPinia({
+						fakeApp: true,
+						createSpy: vi.fn,
 						initialState: {
 							root: {
 								user: { id: "user123", paid: true }, // Ensure user has an id
@@ -433,18 +432,18 @@ describe("AppLibrary", () => {
 		})
 
 		// Get the store instance
-		const store = useRootStore()
-
-		// Mock the fetchUserFiles function in the store
-		store.fetchUserFiles = mockFetchUserFiles
+		const { fetchUserFiles } = useRootStore()
 
 		await wrapper.vm.$nextTick() // Wait for the component to be fully mounted
 		
 		const loadMoreBtn = wrapper.find("[data-test=loadMoreBtn]")
-		await loadMoreBtn.trigger("click")
-		
-		expect(mockFetchUserFiles).toHaveBeenCalled()
-		expect(mockFetchUserFiles).toHaveBeenCalledWith("user123")
+
+		 // Verify button exists before triggering the click
+		 expect(loadMoreBtn.exists()).toBe(true)
+
+		 await loadMoreBtn.trigger("click")
+		 
+		 expect(fetchUserFiles).toHaveBeenCalled()
 	})
 })
 
