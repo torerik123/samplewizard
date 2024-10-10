@@ -31,9 +31,32 @@ import { webmSrc } from "./fixtures/webmSrc";
 // Mock chrome.runtime
 global.chrome = {
 	runtime: {
-	sendMessage: vi.fn()  // Mock sendMessage
-	}
+		onMessage: {
+			addListener: vi.fn(), // Mock addListener method
+		},
+		sendMessage: vi.fn(), // Mock sendMessage,
+		getContexts: vi.fn().mockResolvedValue([]),
+	},
+	storage: {
+		local: {
+			get: vi.fn().mockResolvedValue({}), // Mock chrome.storage.local.get
+			remove: vi.fn().mockResolvedValue({}), // Mock chrome.storage.local.remove
+		},
+	},
 }
+
+// Mock composables
+const useUtilsMock = vi.hoisted(() => {
+	return {
+		useUtils: vi.fn().mockReturnValue({
+			deleteFile: vi.fn(),
+		}),
+	}
+})
+  
+vi.mock('../composables/useUtils', () => ({
+	useUtils: useUtilsMock.useUtils,
+}))
 
 describe("Logo", () => {
 	it("Render logo with correct color", () => {
@@ -292,20 +315,6 @@ describe("AppLibrary", () => {
 		expect(audioVisualizers[1].props("title")).toBe("File 2")
 	})
 
-
-	const useUtilsMock = vi.hoisted(() => {
-		return {
-			useUtils: vi.fn().mockReturnValue({
-				deleteFile: vi.fn(),
-			}),
-		}
-	})
-	  
-	vi.mock('../composables/useUtils', () => ({
-		useUtils: useUtilsMock.useUtils,
-	}));
-
-
 	it("Calls deleteFromLibrary when the delete event is emitted from AudioVisualizer", async () => {
 		const wrapper = mount(AppLibrary, {
 			global: {
@@ -447,7 +456,134 @@ describe("AppLibrary", () => {
 	})
 })
 
-describe.skip("TODO: App.vue", () => {
+describe("App.vue", () => {
+	it("Renders the component correctly", async () => {
+		const wrapper = mount(App, {
+			global: {
+				plugins: [
+					vuetify,
+					createTestingPinia({}),
+				],
+			},
+		})
+
+		await wrapper.vm.$nextTick() // Wait for all mounting and async tasks
+
+		// Check if AppLogo exists
+		expect(wrapper.findComponent(AppLogo).exists()).toBe(true)
+		expect(chrome.runtime.onMessage.addListener).toHaveBeenCalled()
+		
+		// Check if RecordButton exists
+		expect(wrapper.findComponent(RecordButton).exists()).toBe(true)
+	})
+	
+	it.skip("switches tabs when clicked", async () => {
+		const wrapper = mount(App)
+
+		// Initially, no tab should be active
+		expect(wrapper.vm.activeTab).toBe(null)
+
+		// Simulate clicking on the "Library" tab (index 1)
+		const libraryTab = wrapper.find('v-tab[text="Library"]')
+		await libraryTab.trigger("click")
+
+		// Verify that the activeTab is set to 1
+		expect(wrapper.vm.activeTab).toBe(1)
+
+		// Same thing for settings
+	})
+
+	it.skip("sets audioSrc to null when deleteAudio is called", async () => {
+		const wrapper = mount(App)
+
+		// Simulate setting an audio source
+		wrapper.setData({ audioSrc: "sample-audio.mp3" })
+		expect(wrapper.vm.audioSrc).toBe("sample-audio.mp3")
+
+		// Call deleteAudio method
+		wrapper.vm.deleteAudio()
+
+		// Check if audioSrc is set to null
+		expect(wrapper.vm.audioSrc).toBe(null)
+	})
+	
+	it.skip("calls downloadFile when the Download button is clicked", async () => {
+		const downloadFileMock = jest.spyOn(App.methods, "downloadFile")
+		const wrapper = mount(App, {
+			data() {
+				return {
+					audioSrc: "sample-audio.mp3",
+					selectedAudioFormat: "WEBM",
+					sampleName: "Sample 1",
+				}
+			},
+		})
+
+		const downloadButton = wrapper.find('v-btn[text="Download"]')
+		await downloadButton.trigger("click")
+
+		expect(downloadFileMock).toHaveBeenCalledWith(
+			"sample-audio.mp3",
+			"WEBM",
+			"Sample 1"
+		)
+	})
+
+	it.skip("shows snackbar with success message when file is saved", async () => {
+		const wrapper = mount(App, {
+			data() {
+				return {
+					showSnackbar: false,
+					snackbarText: "",
+					snackbarColor: "success",
+				}
+			},
+		})
+
+		// Simulate file save success
+		wrapper.setData({
+			showSnackbar: true,
+			snackbarText: "Saved to library!",
+		})
+
+		// Check if snackbar is visible and the text is correct
+		expect(wrapper.find("v-snackbar").isVisible()).toBe(true)
+		expect(wrapper.find("v-snackbar").text()).toContain("Saved to library!")
+	})
+
+	it.skip("renders Settings tab and Save to library button if user is paid", async () => {
+		const wrapper = mount(App, {
+			data() {
+				return {
+					user: { paid: true },
+				}
+			},
+		})
+
+		// Check if Settings tab is rendered
+		const settingsTab = wrapper.find('v-tab[text="Settings"]')
+		expect(settingsTab.exists()).toBe(true)
+
+		// Check if Save to library button is visible
+		const saveToLibraryBtn = wrapper.find('v-btn[text="Save to library"]')
+		expect(saveToLibraryBtn.exists()).toBe(true)
+	})
+
+	it.skip("validates sample name correctly", async () => {
+		const wrapper = mount(App)
+
+		// Set an invalid sample name
+		wrapper.setData({ sampleName: "invalid/name" })
+
+		// Trigger form validation
+		await wrapper.vm.$refs.form.validate()
+
+		// Check for validation error message
+		const textField = wrapper.find("v-text-field")
+		expect(textField.props().errorMessages).toContain(
+			"Invalid characters in name."
+		)
+	})
 })
 
 describe.skip("TODO: Settings.vue", () => {
