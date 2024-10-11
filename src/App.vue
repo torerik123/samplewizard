@@ -40,12 +40,14 @@
 								:value="0"
 								text="record"
 								prepend-icon="mdi-music-note"
+								data-test="recordTab"
 							/>
 							<v-tab
 								density="compact"
 								:value="1"
 								text="Library"
 								prepend-icon="mdi-file-multiple"
+								data-test="libraryTab"
 							/>
 							<v-tab
 								v-if="user?.paid" 
@@ -53,6 +55,7 @@
 								:value="2"
 								text="Settings"
 								prepend-icon="mdi-cog"
+								data-test="settingsTab"
 							/>
 						</v-tabs>
 					</v-col>

@@ -477,21 +477,37 @@ describe("App.vue", () => {
 		expect(wrapper.findComponent(RecordButton).exists()).toBe(true)
 	})
 	
-	it.skip("switches tabs when clicked", async () => {
-		const wrapper = mount(App)
+	it("Switches tabs when clicked", async () => {
+		const wrapper = mount(App, {
+			global: {
+				plugins: [vuetify, createTestingPinia({
+					initialState: {
+						root: {
+							user: { paid: true }, // Mock paid user to show library
+						},
+					},
+				})],
+			},
+		})
 
-		// Initially, no tab should be active
-		expect(wrapper.vm.activeTab).toBe(null)
+		// Initial state => no active tab
+		expect(wrapper.find(".v-tab--active").exists()).toBe(false)
 
-		// Simulate clicking on the "Library" tab (index 1)
-		const libraryTab = wrapper.find('v-tab[text="Library"]')
+		// Library
+		const libraryTab = wrapper.find('[data-test="libraryTab"]')
 		await libraryTab.trigger("click")
+		
+		// Verify that the Library tab is active by checking for the active class
+		expect(wrapper.find(".v-tab-item--selected").text()).toBe("Library")
 
-		// Verify that the activeTab is set to 1
-		expect(wrapper.vm.activeTab).toBe(1)
+		// Settings
+		const settingsTab = wrapper.find('[data-test="settingsTab"]')
+		await settingsTab.trigger("click")
 
-		// Same thing for settings
+		// Verify that the Settings tab is active
+		expect(wrapper.find(".v-tab-item--selected").text()).toBe("Settings")
 	})
+	
 
 	it.skip("sets audioSrc to null when deleteAudio is called", async () => {
 		const wrapper = mount(App)
