@@ -267,7 +267,7 @@ const audioFormats: Ref<Array<AudioFormatOption>>= ref([
 	// }
 ])
 
-const audioSrc = ref<string>("")
+const audioSrc = ref<string | null>("")
 const isRecording = ref<boolean>(false)
 const selectedAudioFormat = ref<string>("WEBM")
 const activeTab = ref<null | number> (null)

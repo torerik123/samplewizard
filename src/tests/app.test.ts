@@ -1,8 +1,8 @@
 import { VueWrapper, mount, shallowMount } from "@vue/test-utils"
 import { describe, expect, it, beforeEach, vi } from "vitest"
+import { ComponentPublicInstance } from 'vue'
 
 // Pinia
-import { setActivePinia, createPinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
 import { useRootStore } from "../stores/root"
 import { useUtils } from "../composables/useUtils"
@@ -508,20 +508,39 @@ describe("App.vue", () => {
 		expect(wrapper.find(".v-tab-item--selected").text()).toBe("Settings")
 	})
 	
+	type AppComponentInstance = ComponentPublicInstance<{
+		audioSrc: string | null;
+		deleteAudio: () => void;
+	}>
 
-	it.skip("sets audioSrc to null when deleteAudio is called", async () => {
-		const wrapper = mount(App)
+	it.only("sets audioSrc to null when deleteAudio is called", async () => {
+		const wrapper: VueWrapper<ComponentPublicInstance> = mount(App, {
+			global: {
+				plugins: [vuetify, createTestingPinia({
+					initialState: {
+						root: {
+							user: { paid: true }, // Mock paid user to show library
+						},
+					},
+				})],
+			},
+		})		
 
+		// Fix TS error when accessing ref directly without .value in test 
+		const vm = wrapper.vm as AppComponentInstance
+		
 		// Simulate setting an audio source
-		wrapper.setData({ audioSrc: "sample-audio.mp3" })
-		expect(wrapper.vm.audioSrc).toBe("sample-audio.mp3")
-
-		// Call deleteAudio method
-		wrapper.vm.deleteAudio()
-
-		// Check if audioSrc is set to null
-		expect(wrapper.vm.audioSrc).toBe(null)
+		vm.audioSrc = "sample-audio.mp3" 
+		await wrapper.vm.$nextTick()
+		expect(vm.audioSrc).toBe("sample-audio.mp3")
+		
+		// Delete => reset audioSrc
+		vm.deleteAudio() 
+		
+		await wrapper.vm.$nextTick()  // Wait for any asynchronous updates
+		expect(vm.audioSrc).toBe(null)
 	})
+	
 	
 	it.skip("calls downloadFile when the Download button is clicked", async () => {
 		const downloadFileMock = jest.spyOn(App.methods, "downloadFile")
