@@ -130,6 +130,7 @@
 									block
 									:loading="isTranscodingAudio"
 									@click="downloadFile(audioSrc, selectedAudioFormat, sampleName)"
+									data-test="downloadFileBtn"
 								/>
 							</v-col>
 							
@@ -292,11 +293,13 @@ onMounted( async () : Promise<void> => {
 	getSavedRecordings()
 
 	// Set extpay user data + get JWT
+	// @ts-ignore
 	chrome.runtime.sendMessage({
 		type: "fetch-user",
 	})
 
 	// Update user data after payment / login
+	// @ts-ignore
 	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => {
 		if (message.type === "set-user-data") {
 			if (message?.data) {
@@ -368,13 +371,15 @@ const toggleRecordingStatus = async (status) : Promise<void> => {
 	const trim = user.value?.settings?.trimSilence ?? false
 
 	if (status === "start-recording") {
+		// @ts-ignore
 		chrome.runtime.sendMessage({
 			type: status,
 			mute,
 			trim,
 		})
 	} else {
-		// Stop 
+		// Stop
+		// @ts-ignore 
 		chrome.runtime.sendMessage({
 			type: status,
 		})
@@ -383,6 +388,7 @@ const toggleRecordingStatus = async (status) : Promise<void> => {
 
 const deleteAudio = () : void => {
 	audioSrc.value = null
+	// @ts-ignore
 	chrome.storage.local.remove(["new_recording"])
 }	
 
@@ -436,6 +442,7 @@ const saveToLibrary = async () => {
 
 const getSavedRecordings = async () => {
 	// Check for saved recordings on launch
+	// @ts-ignore
 	const savedAudio = await chrome.storage.local.get(["new_recording"])
 	
 	if (savedAudio.new_recording) {
@@ -443,8 +450,10 @@ const getSavedRecordings = async () => {
 		sampleName.value = savedAudio.new_recording?.tabName ? sanitizeFilename(savedAudio.new_recording.tabName) : ""
 	}
 
+	// @ts-ignore
 	chrome.runtime.onMessage.addListener(async(message) : Promise<void> => { 
 		if (message.type === "recording-saved") {
+			// @ts-ignore
 			const result = await chrome.storage.local.get(["new_recording"])
 			const data = result["new_recording"]
 			audioSrc.value = data.recording
@@ -456,6 +465,7 @@ const getSavedRecordings = async () => {
 		}
 	})
 
+	// @ts-ignore
 	const existingContexts = await chrome.runtime.getContexts({});
 	const offscreenDocument = existingContexts.find(
 		(c) : boolean => c.contextType === 'OFFSCREEN_DOCUMENT'

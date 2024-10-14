@@ -471,6 +471,8 @@ describe("App.vue", () => {
 
 		// Check if AppLogo exists
 		expect(wrapper.findComponent(AppLogo).exists()).toBe(true)
+		
+		// @ts-ignore
 		expect(chrome.runtime.onMessage.addListener).toHaveBeenCalled()
 		
 		// Check if RecordButton exists
@@ -509,11 +511,12 @@ describe("App.vue", () => {
 	})
 	
 	type AppComponentInstance = ComponentPublicInstance<{
-		audioSrc: string | null;
-		deleteAudio: () => void;
+		audioSrc: string | null
+		deleteAudio: () => void
+		downloadFile: () => void
 	}>
 
-	it.only("sets audioSrc to null when deleteAudio is called", async () => {
+	it("Sets audioSrc to null when deleteAudio is called", async () => {
 		const wrapper: VueWrapper<ComponentPublicInstance> = mount(App, {
 			global: {
 				plugins: [vuetify, createTestingPinia({
@@ -542,25 +545,41 @@ describe("App.vue", () => {
 	})
 	
 	
-	it.skip("calls downloadFile when the Download button is clicked", async () => {
-		const downloadFileMock = jest.spyOn(App.methods, "downloadFile")
-		const wrapper = mount(App, {
-			data() {
-				return {
-					audioSrc: "sample-audio.mp3",
-					selectedAudioFormat: "WEBM",
-					sampleName: "Sample 1",
-				}
-			},
-		})
+	it.only("TODO: calls downloadFile when the Download button is clicked", async () => {
+		const downloadFileMock = vi.fn()
 
-		const downloadButton = wrapper.find('v-btn[text="Download"]')
+		const wrapper: VueWrapper<ComponentPublicInstance> = mount(App, {
+			global: {
+				plugins: [vuetify, createTestingPinia({
+					initialState: {
+						root: {
+							user: { paid: true }, // Mock paid user to show library
+						},
+					},
+				})],
+				mocks: {
+					// Mocking the downloadFile method
+					downloadFile: downloadFileMock
+				  }
+			},
+		})		
+
+		// Fix TS error when accessing ref directly without .value in test 
+		const vm = wrapper.vm as AppComponentInstance
+		
+		  // Simulate setting an audio source
+		vm.audioSrc = "sample-audio";
+		await wrapper.vm.$nextTick()
+		expect(vm.audioSrc).toBe("sample-audio")
+
+		// Find the download button by the test data attribute
+		const downloadButton = wrapper.get('[data-test="downloadFileBtn"]')
 		await downloadButton.trigger("click")
 
 		expect(downloadFileMock).toHaveBeenCalledWith(
-			"sample-audio.mp3",
-			"WEBM",
-			"Sample 1"
+			"sample-audio", // audioSrc
+			"WEBM", // selectedAudioFormat
+			"" // samplename
 		)
 	})
 
