@@ -134,8 +134,40 @@ describe("RecordButton", () => {
 
 })
 
-describe("AudioVisualizer - single file view", () => {
-	it("Render component", async () => {
+
+describe("AudioVisualizer", () => {
+	it('Renders correctly - list view', async () => {
+		const wrapper = mount(AudioVisualizer, {
+			global: {
+				plugins: [vuetify]
+			},
+			props: {
+				variant: 'list',
+				src: webmSrc,
+				progressColor: 'blue',
+				title: 'Sample Audio'
+			}
+		})
+
+		// Check for play button
+		const playBtn = wrapper.get('[data-test="playButtonList"]')
+		expect(playBtn.exists()).toBe(true)
+
+		// Check the icon inside the play button
+		const icon = playBtn.find('i')
+		expect(icon.exists()).toBe(true)
+		expect(icon.classes()).toContain('mdi-play')
+
+		// Check for title
+		const title = wrapper.find('[data-test="sampleTitle"]')
+		expect(title.text()).toBe('Sample Audio')
+		
+		// Check for waveform element
+		const waveform = wrapper.get('[data-test="waveform"]')
+		expect(waveform.exists()).toBe(true)
+	})
+
+	it("Renders correctly - single file view", async () => {
 		const wrapper = mount(AudioVisualizer, {
 			global: {
 				plugins: [vuetify]
@@ -169,39 +201,6 @@ describe("AudioVisualizer - single file view", () => {
 		// Check for the delete event only
 		expect(wrapper.emitted('delete')).toBeTruthy()
 		expect(wrapper.emitted('delete').length).toBe(1)	
-	})
-})
-
-describe("AudioVisualizer - List View", () => {
-	it('Renders correctly in list view', async () => {
-		const wrapper = mount(AudioVisualizer, {
-			global: {
-				plugins: [vuetify]
-			},
-			props: {
-				variant: 'list',
-				src: webmSrc,
-				progressColor: 'blue',
-				title: 'Sample Audio'
-			}
-		})
-
-		// Check for play button
-		const playBtn = wrapper.get('[data-test="playButtonList"]')
-		expect(playBtn.exists()).toBe(true)
-
-		// Check the icon inside the play button
-		const icon = playBtn.find('i')
-		expect(icon.exists()).toBe(true)
-		expect(icon.classes()).toContain('mdi-play')
-
-		// Check for title
-		const title = wrapper.find('[data-test="sampleTitle"]')
-		expect(title.text()).toBe('Sample Audio')
-		
-		// Check for waveform element
-		const waveform = wrapper.get('[data-test="waveform"]')
-		expect(waveform.exists()).toBe(true)
 	})
 })
 
@@ -637,6 +636,24 @@ describe("App.vue", () => {
 		expect(vm.snackbarColor).toBe("success")
 	})
 
+	it.skip("validates sample name correctly", async () => {
+		const wrapper = mount(App)
+
+		// Set an invalid sample name
+		wrapper.setData({ sampleName: "invalid/name" })
+
+		// Trigger form validation
+		await wrapper.vm.$refs.form.validate()
+
+		// Check for validation error message
+		const textField = wrapper.find("v-text-field")
+		expect(textField.props().errorMessages).toContain(
+			"Invalid characters in name."
+		)
+	})
+})
+
+describe("Settings.vue", () => {
 	it("Renders settings tab", async () => {
 		const wrapper = mount(App, {
 			global: {
@@ -693,25 +710,6 @@ describe("App.vue", () => {
 		const manageSubscriptionButton = wrapper.find('[data-test="manageSubscription"]')
 		expect(manageSubscriptionButton.exists()).toBe(true)
 	})
-
-	it.skip("validates sample name correctly", async () => {
-		const wrapper = mount(App)
-
-		// Set an invalid sample name
-		wrapper.setData({ sampleName: "invalid/name" })
-
-		// Trigger form validation
-		await wrapper.vm.$refs.form.validate()
-
-		// Check for validation error message
-		const textField = wrapper.find("v-text-field")
-		expect(textField.props().errorMessages).toContain(
-			"Invalid characters in name."
-		)
-	})
-})
-
-describe.skip("TODO: Settings.vue", () => {
 })
 
 
