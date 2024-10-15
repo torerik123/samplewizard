@@ -50,6 +50,10 @@ const useUtilsMock = vi.hoisted(() => {
 	return {
 		useUtils: vi.fn().mockReturnValue({
 			deleteFile: vi.fn(),
+			uploadFile: vi.fn().mockResolvedValue({
+				data: { path: "sample-path" },
+				error: null,
+			  }),
 		}),
 	}
 })
@@ -545,7 +549,7 @@ describe("App.vue", () => {
 	})
 	
 	
-	it.only("TODO: calls downloadFile when the Download button is clicked", async () => {
+	it("Calls downloadFile when the Download button is clicked", async () => {
 		const downloadFileMock = vi.fn()
 
 		const wrapper: VueWrapper<ComponentPublicInstance> = mount(App, {
@@ -583,44 +587,111 @@ describe("App.vue", () => {
 		)
 	})
 
-	it.skip("shows snackbar with success message when file is saved", async () => {
+	it.skip("Shows snackbar with success message when file is saved", async () => {
+		const { uploadFile } = useUtils()
+
 		const wrapper = mount(App, {
-			data() {
-				return {
-					showSnackbar: false,
-					snackbarText: "",
-					snackbarColor: "success",
-				}
+			global: {
+				plugins: [
+					vuetify,
+					createTestingPinia({
+						initialState: {
+							root: {
+								user: { id: "123", email: "test@example.com" },
+								files: [],
+							},
+						},
+					}),
+				],
 			},
 		})
 
-		// Simulate file save success
-		wrapper.setData({
-			showSnackbar: true,
-			snackbarText: "Saved to library!",
-		})
+		const vm = wrapper.vm as any
 
-		// Check if snackbar is visible and the text is correct
-		expect(wrapper.find("v-snackbar").isVisible()).toBe(true)
-		expect(wrapper.find("v-snackbar").text()).toContain("Saved to library!")
+		// Mock sampleName and audioSrc to simulate valid input
+		vm.sampleName = "Sample Name"
+		vm.audioSrc = "sample-audio.mp3"
+		await wrapper.vm.$nextTick()
+
+		// Call saveToLibrary method directly
+		await vm.saveToLibrary()
+
+		// Wait for the next DOM update cycle to ensure all reactivity is processed
+		await wrapper.vm.$nextTick()
+
+		// Check the console to see where the flow is being blocked
+		console.log("Show Snackbar:", vm.showSnackbar)
+		console.log("Snackbar Text:", vm.snackbarText)
+		console.log("Snackbar Color:", vm.snackbarColor)
+
+		// Ensure uploadFile was called
+		expect(uploadFile).toHaveBeenCalledWith(
+			vm.audioSrc,
+			vm.user.id,
+			vm.sampleName
+		)
+
+		// Expect the snackbar to be shown after a successful save
+		expect(vm.showSnackbar).toBe(true)
+		expect(vm.snackbarText).toBe("Saved to library!")
+		expect(vm.snackbarColor).toBe("success")
 	})
 
-	it.skip("renders Settings tab and Save to library button if user is paid", async () => {
+	it("Renders settings tab", async () => {
 		const wrapper = mount(App, {
-			data() {
-				return {
-					user: { paid: true },
-				}
+			global: {
+				plugins: [
+					vuetify,
+					createTestingPinia({
+						initialState: {
+							root: {
+								user: { 
+										paid: true,
+										settings: {
+											tabIsDefaultSampleName: false,
+											mutePlayingTab: false,
+											trimSilence: false
+										},
+									},
+								files: [],
+							},
+						},
+					}),
+				],
 			},
 		})
 
-		// Check if Settings tab is rendered
-		const settingsTab = wrapper.find('v-tab[text="Settings"]')
-		expect(settingsTab.exists()).toBe(true)
+		const settingsTab = wrapper.find('[data-test="settingsTab"]')
+		await settingsTab.trigger("click")
 
-		// Check if Save to library button is visible
-		const saveToLibraryBtn = wrapper.find('v-btn[text="Save to library"]')
-		expect(saveToLibraryBtn.exists()).toBe(true)
+		await wrapper.vm.$nextTick()
+		
+		// Check if "Use tab title as default sample name" switch is rendered
+		const defaultSampleNameSwitch = wrapper.find('[data-test="tabIsDefaultSampleName"]')
+		expect(defaultSampleNameSwitch.exists()).toBe(true)
+		
+		// Check if "Mute playing tab" switch is rendered
+		const mutePlayingTabSwitch = wrapper.find('[data-test="mutePlayingTab"]')
+		expect(mutePlayingTabSwitch.exists()).toBe(true)
+		
+		// Check if "Auto trim silence" switch is rendered
+		const trimSilenceSwitch = wrapper.find('[data-test="trimSilence"]')
+		expect(trimSilenceSwitch.exists()).toBe(true)
+		
+		// Simulate settings change to make Save and Cancel buttons visible
+		await defaultSampleNameSwitch.find("input").setChecked(true)
+		
+		// Check if "Save" button is rendered
+		const saveButton = wrapper.find('[data-test="updateSettings"]')
+		expect(saveButton.exists()).toBe(true)
+		
+		// Check if "Cancel" button is rendered
+		const cancelButton = wrapper.find('[data-test="updateSettings"]')
+		expect(cancelButton.exists()).toBe(true)
+		
+		// Check if "Manage subscription" button is rendered
+		const manageSubscriptionButton = wrapper.find('[data-test="manageSubscription"]')
+		expect(manageSubscriptionButton.exists()).toBe(true)
 	})
 
 	it.skip("validates sample name correctly", async () => {

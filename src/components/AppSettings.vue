@@ -3,6 +3,7 @@
 		<!-- <v-card-title class="text-start">Recording</v-card-title> -->
 		<v-switch 
 			v-model="tabIsDefaultSampleName"
+			data-test="tabIsDefaultSampleName"
 			label="Use tab title as default sample name"
 			hide-details
 			:color="highlightColor"
@@ -10,6 +11,7 @@
 
 		<v-switch 
 			v-model="mutePlayingTab"
+			data-test="mutePlayingTab"
 			label="Mute playing tab"
 			hide-details
 			:color="highlightColor"
@@ -17,6 +19,7 @@
 
 		<v-switch 
 			v-model="trimSilence"
+			data-test="trimSilence"
 			label="Auto trim silence"
 			hide-details
 			:color="highlightColor"
@@ -30,6 +33,7 @@
 		>
 			<v-col>
 				<v-btn 
+					data-test="updateSettings"
 					@click="updateSettings"
 					block
 					text="Save"
@@ -40,6 +44,7 @@
 			</v-col>
 			<v-col>
 				<v-btn 
+					data-test="resetSettings"
 					@click="resetSettings"
 					text="Cancel"
 					prepend-icon="mdi-cancel"
@@ -52,6 +57,7 @@
 				text="Manage subscription"
 				class="rounded-lg"
 				@click="manageSubscription"
+				data-test="manageSubscription"
 				block
 				size="large"
 			/>
@@ -68,6 +74,7 @@ import { storeToRefs } from 'pinia';
 import { UserSettings } from '../types/global'
 
 const manageSubscription = () => {
+	// @ts-ignore
 	chrome.runtime.sendMessage({
 		type: "manage-subscription"
 	})
