@@ -1,4 +1,4 @@
-/// <reference types="vitest" />
+// <reference types="vitest" />
 import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
 import { crx } from "@crxjs/vite-plugin"
@@ -29,6 +29,9 @@ export default defineConfig({
 		strictPort: true,
 		hmr: {
 			port: 3000,
+		},
+		headers: {
+			"Access-Control-Allow-Origin": "*",
 		},
 	},
 	preview: {
